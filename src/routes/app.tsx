@@ -59,14 +59,22 @@ function AppMobile() {
           <div className="flex h-full flex-col sm:h-[794px]">
             <div className="flex-1 overflow-y-auto pb-24">
               {screen === "home" && <HomeScreen onCapture={() => setScreen("capture")} />}
-              {screen === "catalog" && <CatalogScreen onOpenPlants={() => setScreen("catalog-plants")} />}
-              {screen === "catalog-plants" && <MyPlantsScreen onBack={() => setScreen("catalog")} />}
+              {screen === "catalog" && (
+                <CatalogScreen onOpenPlants={() => setScreen("catalog-plants")} />
+              )}
+              {screen === "catalog-plants" && (
+                <MyPlantsScreen onBack={() => setScreen("catalog")} />
+              )}
               {screen === "profile" && <ProfileScreen />}
               {screen === "capture" && <CaptureFlow onClose={() => setScreen("home")} />}
             </div>
 
             {screen !== "capture" && (
-              <BottomNav current={screen} onChange={setScreen} onCapture={() => setScreen("capture")} />
+              <BottomNav
+                current={screen}
+                onChange={setScreen}
+                onCapture={() => setScreen("capture")}
+              />
             )}
           </div>
         </div>
@@ -81,7 +89,11 @@ function HomeScreen({ onCapture }: { onCapture: () => void }) {
     <div className="space-y-4 px-5 pt-6">
       {/* header */}
       <div className="flex items-center gap-3">
-        <img src={assets.paulo} alt="Paulo" className="h-14 w-14 rounded-2xl object-cover ring-2 ring-moss/20" />
+        <img
+          src={assets.paulo}
+          alt="Paulo"
+          className="h-14 w-14 rounded-2xl object-cover ring-2 ring-moss/20"
+        />
         <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Olá,</p>
           <h1 className="font-display text-2xl leading-tight text-moss">Paulo S.</h1>
@@ -112,7 +124,11 @@ function HomeScreen({ onCapture }: { onCapture: () => void }) {
       </div>
 
       {/* Ranking */}
-      <Section icon={<Trophy className="h-4 w-4" />} title="Ranking da Turma" subtitle="1º Ano · você está em 2º lugar">
+      <Section
+        icon={<Trophy className="h-4 w-4" />}
+        title="Ranking da Turma"
+        subtitle="1º Ano · você está em 2º lugar"
+      >
         <div className="space-y-1.5">
           {ranking.slice(0, 3).map((r) => (
             <div
@@ -121,14 +137,21 @@ function HomeScreen({ onCapture }: { onCapture: () => void }) {
                 r.you ? "bg-moss/8 ring-1 ring-moss/20" : ""
               }`}
             >
-              <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                r.pos === 1 ? "bg-xp text-foreground" :
-                r.pos === 2 ? "bg-sage text-moss" :
-                "bg-terracotta/30 text-terracotta"
-              }`}>
+              <span
+                className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
+                  r.pos === 1
+                    ? "bg-xp text-foreground"
+                    : r.pos === 2
+                      ? "bg-sage text-moss"
+                      : "bg-terracotta/30 text-terracotta"
+                }`}
+              >
                 {r.pos}º
               </span>
-              <span className="flex-1 truncate font-medium">{r.name}{r.you && " (você)"}</span>
+              <span className="flex-1 truncate font-medium">
+                {r.name}
+                {r.you && " (você)"}
+              </span>
               <span className="font-medium text-moss">{r.xp} XP</span>
             </div>
           ))}
@@ -136,7 +159,11 @@ function HomeScreen({ onCapture }: { onCapture: () => void }) {
       </Section>
 
       {/* Missões */}
-      <Section icon={<Leaf className="h-4 w-4" />} title="Missões Ativas" subtitle="Da Profª Eliana">
+      <Section
+        icon={<Leaf className="h-4 w-4" />}
+        title="Missões Ativas"
+        subtitle="Da Profª Eliana"
+      >
         <div className="space-y-2">
           {missoes.map((m) => (
             <button
@@ -183,15 +210,27 @@ function HomeScreen({ onCapture }: { onCapture: () => void }) {
 }
 
 function Section({
-  icon, title, subtitle, children,
-}: { icon: React.ReactNode; title: string; subtitle?: string; children: React.ReactNode }) {
+  icon,
+  title,
+  subtitle,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
         <h2 className="flex items-center gap-1.5 font-display text-lg text-moss">
           {icon} {title}
         </h2>
-        {subtitle && <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{subtitle}</span>}
+        {subtitle && (
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {subtitle}
+          </span>
+        )}
       </div>
       {children}
     </div>
@@ -201,9 +240,25 @@ function Section({
 /* ---------------- CATALOG ---------------- */
 function CatalogScreen({ onOpenPlants }: { onOpenPlants: () => void }) {
   const items = [
-    { icon: Leaf, label: "Minhas Plantas", count: "12 espécies descobertas", onClick: onOpenPlants, tone: "moss" as const },
-    { icon: AlertTriangle, label: "Espécies Exóticas Invasoras", count: "7 registradas", tone: "invasive" as const },
-    { icon: Award, label: "Conquistas e Medalhas", count: "5 conquistadas", tone: "terracotta" as const },
+    {
+      icon: Leaf,
+      label: "Minhas Plantas",
+      count: "12 espécies descobertas",
+      onClick: onOpenPlants,
+      tone: "moss" as const,
+    },
+    {
+      icon: AlertTriangle,
+      label: "Espécies Exóticas Invasoras",
+      count: "7 registradas",
+      tone: "invasive" as const,
+    },
+    {
+      icon: Award,
+      label: "Conquistas e Medalhas",
+      count: "5 conquistadas",
+      tone: "terracotta" as const,
+    },
   ];
   return (
     <div className="space-y-4 px-5 pt-6">
@@ -219,11 +274,15 @@ function CatalogScreen({ onOpenPlants }: { onOpenPlants: () => void }) {
             onClick={it.onClick}
             className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-moss/40"
           >
-            <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${
-              it.tone === "moss" ? "bg-moss/10 text-moss" :
-              it.tone === "invasive" ? "bg-invasive/10 text-invasive" :
-              "bg-terracotta/15 text-terracotta"
-            }`}>
+            <div
+              className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${
+                it.tone === "moss"
+                  ? "bg-moss/10 text-moss"
+                  : it.tone === "invasive"
+                    ? "bg-invasive/10 text-invasive"
+                    : "bg-terracotta/15 text-terracotta"
+              }`}
+            >
               <it.icon className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -237,7 +296,9 @@ function CatalogScreen({ onOpenPlants }: { onOpenPlants: () => void }) {
 
       <div className="mt-6 rounded-2xl bg-moss p-4 text-moss-foreground">
         <p className="font-display text-xl leading-tight">Guardião da Mata Atlântica</p>
-        <p className="mt-1 text-sm opacity-80">Registre 10 espécies nativas para desbloquear esta conquista. <strong>Faltam 3.</strong></p>
+        <p className="mt-1 text-sm opacity-80">
+          Registre 10 espécies nativas para desbloquear esta conquista. <strong>Faltam 3.</strong>
+        </p>
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-moss-foreground/20">
           <div className="h-full w-[70%] rounded-full bg-xp" />
         </div>
@@ -247,11 +308,7 @@ function CatalogScreen({ onOpenPlants }: { onOpenPlants: () => void }) {
 }
 
 function MyPlantsScreen({ onBack }: { onBack: () => void }) {
-  const all = [
-    ...plants,
-    ...plants,
-    ...plants,
-  ];
+  const all = [...plants, ...plants, ...plants];
   return (
     <div className="space-y-4 px-5 pt-6">
       <button onClick={onBack} className="flex items-center gap-1 text-sm text-moss">
@@ -262,7 +319,12 @@ function MyPlantsScreen({ onBack }: { onBack: () => void }) {
         {all.slice(0, 6).map((p, i) => (
           <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
             <div className="aspect-square bg-secondary">
-              <img src={p.image} alt={p.popular} className="h-full w-full object-cover" loading="lazy" />
+              <img
+                src={p.image}
+                alt={p.popular}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
             </div>
             <div className="p-2.5">
               <p className="truncate text-sm font-medium">{p.popular}</p>
@@ -282,7 +344,11 @@ function ProfileScreen() {
       <h1 className="font-display text-3xl text-moss">Meu Perfil</h1>
 
       <div className="rounded-2xl bg-card border border-border p-5 text-center">
-        <img src={assets.paulo} alt="Paulo" className="mx-auto h-20 w-20 rounded-2xl object-cover ring-2 ring-moss/20" />
+        <img
+          src={assets.paulo}
+          alt="Paulo"
+          className="mx-auto h-20 w-20 rounded-2xl object-cover ring-2 ring-moss/20"
+        />
         <h2 className="mt-3 font-display text-2xl text-moss">Paulo S.</h2>
         <p className="text-sm text-muted-foreground">Nível 4 · 320 XP · 1º Ano</p>
         <button className="mt-4 w-full rounded-xl bg-moss px-4 py-2.5 text-sm font-medium text-moss-foreground">
@@ -315,8 +381,18 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function SettingRow({
-  icon: Icon, label, toggle, defaultOn, danger,
-}: { icon: React.ElementType; label: string; toggle?: boolean; defaultOn?: boolean; danger?: boolean }) {
+  icon: Icon,
+  label,
+  toggle,
+  defaultOn,
+  danger,
+}: {
+  icon: React.ElementType;
+  label: string;
+  toggle?: boolean;
+  defaultOn?: boolean;
+  danger?: boolean;
+}) {
   const [on, setOn] = useState(!!defaultOn);
   return (
     <button
@@ -328,8 +404,12 @@ function SettingRow({
       <Icon className="h-4 w-4" />
       <span className="flex-1 text-sm">{label}</span>
       {toggle ? (
-        <div className={`flex h-6 w-10 items-center rounded-full transition ${on ? "bg-moss" : "bg-secondary"}`}>
-          <div className={`h-5 w-5 rounded-full bg-card transition ${on ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+        <div
+          className={`flex h-6 w-10 items-center rounded-full transition ${on ? "bg-moss" : "bg-secondary"}`}
+        >
+          <div
+            className={`h-5 w-5 rounded-full bg-card transition ${on ? "translate-x-[18px]" : "translate-x-0.5"}`}
+          />
         </div>
       ) : (
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -383,7 +463,9 @@ function CaptureFlow({ onClose }: { onClose: () => void }) {
           <Loader2 className="h-12 w-12 animate-spin text-sage" />
           <div>
             <p className="font-display text-2xl">Analisando com IA…</p>
-            <p className="mt-1 text-sm opacity-70">Comparando com 2.400 espécies da Mata Atlântica</p>
+            <p className="mt-1 text-sm opacity-70">
+              Comparando com 2.400 espécies da Mata Atlântica
+            </p>
           </div>
         </div>
       )}
@@ -433,9 +515,7 @@ function PlantSheet({ plant, onContinue }: { plant: Plant; onContinue: () => voi
             <span
               key={t}
               className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
-                plant.invasive
-                  ? "bg-invasive/12 text-invasive"
-                  : "bg-moss/10 text-moss"
+                plant.invasive ? "bg-invasive/12 text-invasive" : "bg-moss/10 text-moss"
               }`}
             >
               {t}
@@ -516,7 +596,10 @@ function MissionUpdated({ onClose }: { onClose: () => void }) {
         +15 XP <span className="text-muted-foreground">(10 captura + 5 bônus)</span>
       </p>
 
-      <button onClick={onClose} className="mt-8 w-full max-w-xs rounded-2xl bg-moss py-3 font-medium text-moss-foreground">
+      <button
+        onClick={onClose}
+        className="mt-8 w-full max-w-xs rounded-2xl bg-moss py-3 font-medium text-moss-foreground"
+      >
         Voltar à missão
       </button>
     </div>
@@ -525,8 +608,14 @@ function MissionUpdated({ onClose }: { onClose: () => void }) {
 
 /* ---------------- BOTTOM NAV ---------------- */
 function BottomNav({
-  current, onChange, onCapture,
-}: { current: Screen; onChange: (s: Screen) => void; onCapture: () => void }) {
+  current,
+  onChange,
+  onCapture,
+}: {
+  current: Screen;
+  onChange: (s: Screen) => void;
+  onCapture: () => void;
+}) {
   const items: { key: Screen; label: string; icon: React.ElementType }[] = [
     { key: "home", label: "Início", icon: Home },
     { key: "catalog", label: "Catálogo", icon: BookOpen },
@@ -539,7 +628,9 @@ function BottomNav({
       <div className="grid grid-cols-5 items-end px-2 pb-3 pt-2">
         {items.map((it) => {
           const { key, ...rest } = it;
-          return <NavBtn key={key} {...rest} active={current === key} onClick={() => onChange(key)} />;
+          return (
+            <NavBtn key={key} {...rest} active={current === key} onClick={() => onChange(key)} />
+          );
         })}
         <button
           onClick={onCapture}
@@ -547,10 +638,18 @@ function BottomNav({
         >
           <Camera className="h-6 w-6" />
         </button>
-        <NavBtn key="cat-stub" label="Mapa" icon={Leaf} active={false} onClick={() => onChange("catalog")} />
+        <NavBtn
+          key="cat-stub"
+          label="Mapa"
+          icon={Leaf}
+          active={false}
+          onClick={() => onChange("catalog")}
+        />
         {right.map((it) => {
           const { key, ...rest } = it;
-          return <NavBtn key={key} {...rest} active={current === key} onClick={() => onChange(key)} />;
+          return (
+            <NavBtn key={key} {...rest} active={current === key} onClick={() => onChange(key)} />
+          );
         })}
       </div>
     </div>
@@ -558,8 +657,16 @@ function BottomNav({
 }
 
 function NavBtn({
-  label, icon: Icon, active, onClick,
-}: { label: string; icon: React.ElementType; active: boolean; onClick: () => void }) {
+  label,
+  icon: Icon,
+  active,
+  onClick,
+}: {
+  label: string;
+  icon: React.ElementType;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}

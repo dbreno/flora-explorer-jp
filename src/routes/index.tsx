@@ -30,7 +30,8 @@ function Landing() {
             Educação ambiental · Ensino Médio
           </span>
           <h1 className="mt-6 font-display text-5xl leading-[1.05] text-moss text-balance sm:text-7xl">
-            A Mata Atlântica de João Pessoa <em className="text-terracotta">cabe no bolso</em> dos seus alunos.
+            A Mata Atlântica de João Pessoa <em className="text-terracotta">cabe no bolso</em> dos
+            seus alunos.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
             Um jogo de exploração urbana que transforma parques, praças e ruas em laboratório vivo
@@ -76,7 +77,8 @@ function Landing() {
             </div>
             <h2 className="mt-8 font-display text-3xl text-moss">Sou Professora</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Crie atividades com geofencing no mapa de João Pessoa e acompanhe o engajamento da turma.
+              Crie atividades com geofencing no mapa de João Pessoa e acompanhe o engajamento da
+              turma.
             </p>
             <div className="mt-6 flex items-center gap-2 text-sm font-medium text-moss">
               Abrir painel

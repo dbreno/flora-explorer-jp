@@ -70,7 +70,9 @@ function Sidebar({ current, onChange }: { current: Section; onChange: (s: Sectio
         </div>
         <div>
           <p className="font-display text-lg leading-none text-moss">Flora Explorer</p>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Painel Pedagógico</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Painel Pedagógico
+          </p>
         </div>
       </Link>
 
@@ -126,7 +128,11 @@ function TopBar() {
         <button className="grid h-9 w-9 place-items-center rounded-full bg-card border border-border">
           <Bell className="h-4 w-4 text-moss" />
         </button>
-        <img src={assets.eliana} alt="Eliana" className="h-10 w-10 rounded-full object-cover ring-2 ring-moss/20" />
+        <img
+          src={assets.eliana}
+          alt="Eliana"
+          className="h-10 w-10 rounded-full object-cover ring-2 ring-moss/20"
+        />
       </div>
     </header>
   );
@@ -156,7 +162,8 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
                 Alta incidência de Amendoeira invasora
               </h3>
               <p className="mt-1 text-sm text-foreground/75">
-                Detectada por alunos do 2º Ano na região do <strong>Bessa</strong>. 14 registros nos últimos 7 dias.
+                Detectada por alunos do 2º Ano na região do <strong>Bessa</strong>. 14 registros nos
+                últimos 7 dias.
               </p>
               <button className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-invasive px-3 py-1.5 text-xs font-medium text-invasive-foreground">
                 <MapPin className="h-3 w-3" /> Ver mapa completo
@@ -187,7 +194,12 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
               </thead>
               <tbody className="divide-y divide-border bg-card">
                 {[
-                  { d: "Explore o Parque Solon de Lucena", t: "1º Ano", s: "andamento", p: "20/06" },
+                  {
+                    d: "Explore o Parque Solon de Lucena",
+                    t: "1º Ano",
+                    s: "andamento",
+                    p: "20/06",
+                  },
                   { d: "Árvores da nossa cidade", t: "2º Ano", s: "concluido", p: "10/06" },
                   { d: "Espécies da orla de Cabo Branco", t: "3º Ano", s: "andamento", p: "25/06" },
                   { d: "Caça às invasoras no Bessa", t: "2º Ano", s: "andamento", p: "28/06" },
@@ -215,19 +227,30 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
         </Card>
 
         <Card>
-          <CardHeader title="Ranking Geral" subtitle="Top alunos da semana" icon={<Trophy className="h-4 w-4 text-xp" />} />
+          <CardHeader
+            title="Ranking Geral"
+            subtitle="Top alunos da semana"
+            icon={<Trophy className="h-4 w-4 text-xp" />}
+          />
           <div className="mt-2 space-y-2">
             {[
               { p: 1, n: "Felipe Andrade", t: "1º Ano", xp: 560 },
               { p: 2, n: "Paulo S.", t: "1º Ano", xp: 320 },
               { p: 3, n: "Ana Beatriz", t: "2º Ano", xp: 280 },
             ].map((r) => (
-              <div key={r.p} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-                <span className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${
-                  r.p === 1 ? "bg-xp text-foreground" :
-                  r.p === 2 ? "bg-sage text-moss" :
-                  "bg-terracotta/30 text-terracotta"
-                }`}>
+              <div
+                key={r.p}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+              >
+                <span
+                  className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${
+                    r.p === 1
+                      ? "bg-xp text-foreground"
+                      : r.p === 2
+                        ? "bg-sage text-moss"
+                        : "bg-terracotta/30 text-terracotta"
+                  }`}
+                >
                   {r.p}º
                 </span>
                 <div className="min-w-0 flex-1">
@@ -249,10 +272,21 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
     <div className={`rounded-2xl border border-border bg-card p-5 ${className}`}>{children}</div>
   );
 }
-function CardHeader({ title, subtitle, icon }: { title: string; subtitle?: string; icon?: React.ReactNode }) {
+function CardHeader({
+  title,
+  subtitle,
+  icon,
+}: {
+  title: string;
+  subtitle?: string;
+  icon?: React.ReactNode;
+}) {
   return (
     <div>
-      <h2 className="flex items-center gap-2 font-display text-lg text-moss">{icon}{title}</h2>
+      <h2 className="flex items-center gap-2 font-display text-lg text-moss">
+        {icon}
+        {title}
+      </h2>
       {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
     </div>
   );
@@ -305,7 +339,12 @@ function GerenciarTurmas() {
           <h1 className="font-display text-3xl text-moss">Gerenciar Turmas</h1>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Select label="Turma" value={turma} onChange={(v) => setTurma(v as Turma)} options={[...turmas]} />
+          <Select
+            label="Turma"
+            value={turma}
+            onChange={(v) => setTurma(v as Turma)}
+            options={[...turmas]}
+          />
           <Select
             label="Atividade"
             value={atividade}
@@ -375,7 +414,10 @@ function GerenciarTurmas() {
                     {a.plantas.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {a.plantas.map((p) => (
-                          <span key={p} className="rounded-full bg-sage/25 px-2 py-0.5 text-[11px] font-medium text-moss">
+                          <span
+                            key={p}
+                            className="rounded-full bg-sage/25 px-2 py-0.5 text-[11px] font-medium text-moss"
+                          >
                             🌿 {p}
                           </span>
                         ))}
@@ -398,12 +440,23 @@ function GerenciarTurmas() {
   );
 }
 
-function Kpi({ label, value, tone = "neutral" }: { label: string; value: string; tone?: "neutral" | "moss" | "invasive" | "terracotta" }) {
+function Kpi({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "moss" | "invasive" | "terracotta";
+}) {
   const ring =
-    tone === "moss" ? "border-moss/30 bg-moss/8" :
-    tone === "invasive" ? "border-invasive/30 bg-invasive/8" :
-    tone === "terracotta" ? "border-terracotta/30 bg-terracotta/10" :
-    "border-border bg-card";
+    tone === "moss"
+      ? "border-moss/30 bg-moss/8"
+      : tone === "invasive"
+        ? "border-invasive/30 bg-invasive/8"
+        : tone === "terracotta"
+          ? "border-terracotta/30 bg-terracotta/10"
+          : "border-border bg-card";
   return (
     <div className={`rounded-2xl border p-4 ${ring}`}>
       <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -413,8 +466,16 @@ function Kpi({ label, value, tone = "neutral" }: { label: string; value: string;
 }
 
 function Select({
-  label, value, onChange, options,
-}: { label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
   return (
     <label className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs">
       <span className="text-muted-foreground">{label}:</span>
@@ -423,7 +484,9 @@ function Select({
         onChange={(e) => onChange(e.target.value)}
         className="bg-transparent font-medium text-moss outline-none"
       >
-        {options.map((o) => <option key={o}>{o}</option>)}
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
       </select>
     </label>
   );
@@ -435,7 +498,9 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
   const [turma, setTurma] = useState<Turma>("1º Ano");
   const [drawPolygon, setDrawPolygon] = useState(false);
   const [title, setTitle] = useState("Caça às invasoras no Bessa");
-  const [description, setDescription] = useState("Encontre e fotografe 3 espécies invasoras no bairro do Bessa.");
+  const [description, setDescription] = useState(
+    "Encontre e fotografe 3 espécies invasoras no bairro do Bessa.",
+  );
   const [obligatory, setObligatory] = useState(true);
   const [done, setDone] = useState(false);
 
@@ -459,7 +524,9 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
             >
               {i + 1}
             </span>
-            <span className={i === step ? "font-semibold text-moss" : "text-muted-foreground"}>{s}</span>
+            <span className={i === step ? "font-semibold text-moss" : "text-muted-foreground"}>
+              {s}
+            </span>
             {i < steps.length - 1 && <span className="h-px w-6 bg-border" />}
           </li>
         ))}
@@ -475,10 +542,19 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
             Alertas enviados para os {alunosRelatorio.length} alunos do {turma}.
           </p>
           <div className="mt-6 flex justify-center gap-2">
-            <button onClick={() => { setDone(false); setStep(0); }} className="rounded-full border border-border bg-card px-4 py-2 text-sm">
+            <button
+              onClick={() => {
+                setDone(false);
+                setStep(0);
+              }}
+              className="rounded-full border border-border bg-card px-4 py-2 text-sm"
+            >
               Criar outro
             </button>
-            <button onClick={onDone} className="rounded-full bg-moss px-4 py-2 text-sm text-moss-foreground">
+            <button
+              onClick={onDone}
+              className="rounded-full bg-moss px-4 py-2 text-sm text-moss-foreground"
+            >
               Voltar ao dashboard
             </button>
           </div>
@@ -487,14 +563,19 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
         <Card>
           {step === 0 && (
             <div className="space-y-4">
-              <CardHeader title="Para qual turma é este desafio?" subtitle="Apenas alunos selecionados serão notificados." />
+              <CardHeader
+                title="Para qual turma é este desafio?"
+                subtitle="Apenas alunos selecionados serão notificados."
+              />
               <div className="grid gap-3 sm:grid-cols-3">
                 {[...turmas].map((t) => (
                   <button
                     key={t}
                     onClick={() => setTurma(t)}
                     className={`rounded-2xl border-2 p-4 text-left transition ${
-                      turma === t ? "border-moss bg-moss/8" : "border-border bg-card hover:border-moss/40"
+                      turma === t
+                        ? "border-moss bg-moss/8"
+                        : "border-border bg-card hover:border-moss/40"
                     }`}
                   >
                     <p className="font-display text-2xl text-moss">{t}</p>
@@ -508,11 +589,16 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
           {step === 1 && (
             <div className="space-y-4">
               <div className="flex flex-wrap items-end justify-between gap-3">
-                <CardHeader title="Delimitar a zona no mapa" subtitle="João Pessoa · selecione a área onde os alunos devem explorar." />
+                <CardHeader
+                  title="Delimitar a zona no mapa"
+                  subtitle="João Pessoa · selecione a área onde os alunos devem explorar."
+                />
                 <button
                   onClick={() => setDrawPolygon((v) => !v)}
                   className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                    drawPolygon ? "bg-moss text-moss-foreground" : "border border-moss/30 bg-card text-moss"
+                    drawPolygon
+                      ? "bg-moss text-moss-foreground"
+                      : "border border-moss/30 bg-card text-moss"
                   }`}
                 >
                   <Pencil className="h-3 w-3" />
@@ -523,7 +609,11 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
               <div className="relative overflow-hidden rounded-2xl border border-border bg-secondary">
                 <img src={mapJP} alt="Mapa de João Pessoa" className="w-full" loading="lazy" />
                 {drawPolygon && (
-                  <svg viewBox="0 0 100 67" className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none">
+                  <svg
+                    viewBox="0 0 100 67"
+                    className="pointer-events-none absolute inset-0 h-full w-full"
+                    preserveAspectRatio="none"
+                  >
                     <polygon
                       points="62,18 80,22 84,38 72,52 56,46 54,30"
                       fill="oklch(0.62 0.13 45 / 0.25)"
@@ -532,9 +622,22 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
                       strokeDasharray="1.2 0.8"
                     />
                     {[
-                      [62, 18], [80, 22], [84, 38], [72, 52], [56, 46], [54, 30],
+                      [62, 18],
+                      [80, 22],
+                      [84, 38],
+                      [72, 52],
+                      [56, 46],
+                      [54, 30],
                     ].map(([x, y], i) => (
-                      <circle key={i} cx={x} cy={y} r="1.2" fill="oklch(0.62 0.13 45)" stroke="white" strokeWidth="0.4" />
+                      <circle
+                        key={i}
+                        cx={x}
+                        cy={y}
+                        r="1.2"
+                        fill="oklch(0.62 0.13 45)"
+                        stroke="white"
+                        strokeWidth="0.4"
+                      />
                     ))}
                   </svg>
                 )}
@@ -555,26 +658,45 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
 
           {step === 2 && (
             <div className="space-y-4">
-              <CardHeader title="Detalhes do desafio" subtitle="Os alunos verão essas informações no app." />
+              <CardHeader
+                title="Detalhes do desafio"
+                subtitle="Os alunos verão essas informações no app."
+              />
               <Field label="Título">
-                <input value={title} onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-moss" />
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-moss"
+                />
               </Field>
               <Field label="Descrição">
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-moss" />
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-moss"
+                />
               </Field>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Data-limite">
-                  <input type="date" defaultValue="2026-06-28"
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-moss" />
+                  <input
+                    type="date"
+                    defaultValue="2026-06-28"
+                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-moss"
+                  />
                 </Field>
                 <Field label="Obrigatório para todos">
-                  <button onClick={() => setObligatory((v) => !v)}
-                    className={`flex h-10 w-full items-center justify-between rounded-xl border border-border px-3 text-sm ${obligatory ? "bg-moss/8 text-moss" : "bg-card text-muted-foreground"}`}>
+                  <button
+                    onClick={() => setObligatory((v) => !v)}
+                    className={`flex h-10 w-full items-center justify-between rounded-xl border border-border px-3 text-sm ${obligatory ? "bg-moss/8 text-moss" : "bg-card text-muted-foreground"}`}
+                  >
                     {obligatory ? "Sim" : "Não"}
-                    <div className={`flex h-5 w-9 items-center rounded-full transition ${obligatory ? "bg-moss" : "bg-secondary"}`}>
-                      <div className={`h-4 w-4 rounded-full bg-card transition ${obligatory ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+                    <div
+                      className={`flex h-5 w-9 items-center rounded-full transition ${obligatory ? "bg-moss" : "bg-secondary"}`}
+                    >
+                      <div
+                        className={`h-4 w-4 rounded-full bg-card transition ${obligatory ? "translate-x-[18px]" : "translate-x-0.5"}`}
+                      />
                     </div>
                   </button>
                 </Field>
@@ -587,7 +709,10 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
               <CardHeader title="Revise e lance o desafio" />
               <div className="grid gap-3 sm:grid-cols-2">
                 <Review label="Turma" value={turma} />
-                <Review label="Zona no mapa" value={drawPolygon ? "Bessa / Manaíra (~2,4 km²)" : "Sem geofencing"} />
+                <Review
+                  label="Zona no mapa"
+                  value={drawPolygon ? "Bessa / Manaíra (~2,4 km²)" : "Sem geofencing"}
+                />
                 <Review label="Título" value={title} />
                 <Review label="Prazo" value="28/06/2026" />
                 <Review label="Obrigatório" value={obligatory ? "Sim" : "Não"} />
@@ -655,8 +780,15 @@ function Configuracoes() {
       <Card>
         <CardHeader title="Integrações" subtitle="Sincronize com ferramentas pedagógicas." />
         <div className="mt-4 space-y-3">
-          <IntegrationRow name="Google Sala de Aula" desc="Sincronize turmas e lance atividades direto no Classroom." connected />
-          <IntegrationRow name="Diário de Classe (SEDUC-PB)" desc="Envie automaticamente notas dos desafios concluídos." />
+          <IntegrationRow
+            name="Google Sala de Aula"
+            desc="Sincronize turmas e lance atividades direto no Classroom."
+            connected
+          />
+          <IntegrationRow
+            name="Diário de Classe (SEDUC-PB)"
+            desc="Envie automaticamente notas dos desafios concluídos."
+          />
         </div>
       </Card>
 
@@ -664,16 +796,28 @@ function Configuracoes() {
         <CardHeader title="Dados da Conta" subtitle="Profª Eliana M. · UFPB" />
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="Nome completo">
-            <input defaultValue="Eliana Mendes" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none" />
+            <input
+              defaultValue="Eliana Mendes"
+              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+            />
           </Field>
           <Field label="E-mail institucional">
-            <input defaultValue="eliana.mendes@escola.pb.gov.br" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none" />
+            <input
+              defaultValue="eliana.mendes@escola.pb.gov.br"
+              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+            />
           </Field>
           <Field label="Escola">
-            <input defaultValue="EEEFM Olivina Olívia" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none" />
+            <input
+              defaultValue="EEEFM Olivina Olívia"
+              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+            />
           </Field>
           <Field label="Disciplina">
-            <input defaultValue="Biologia · Ensino Médio" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none" />
+            <input
+              defaultValue="Biologia · Ensino Médio"
+              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+            />
           </Field>
         </div>
       </Card>
@@ -681,7 +825,15 @@ function Configuracoes() {
   );
 }
 
-function IntegrationRow({ name, desc, connected }: { name: string; desc: string; connected?: boolean }) {
+function IntegrationRow({
+  name,
+  desc,
+  connected,
+}: {
+  name: string;
+  desc: string;
+  connected?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-cream p-3">
       <div className="flex items-center gap-3">
