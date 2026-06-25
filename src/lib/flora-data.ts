@@ -40,6 +40,17 @@ export const plants: Plant[] = [
     curiosity:
       "Estudos da UFPB mostram que a Amendoeira corresponde a parte significativa dos 37% de espécies invasoras na arborização urbana de João Pessoa.",
   },
+  {
+    id: "pau-brasil",
+    popular: "Pau-brasil",
+    scientific: "Paubrasilia echinata",
+    image: ipe,
+    tags: ["#MataAtlântica", "#Nativa", "#Ameaçada"],
+    description:
+      "Árvore que deu nome ao nosso país. Sua madeira avermelhada foi intensamente explorada no passado, tornando-a uma espécie ameaçada de extinção.",
+    curiosity:
+      "Atualmente, o Pau-brasil é protegido por lei. Plantios de recuperação em João Pessoa buscam reintroduzir a espécie em seu habitat natural.",
+  },
 ];
 
 export const turmas = ["1º Ano", "2º Ano", "3º Ano"] as const;

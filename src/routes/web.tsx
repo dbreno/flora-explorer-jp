@@ -35,13 +35,13 @@ function WebDashboard() {
   const [section, setSection] = useState<Section>("dashboard");
 
   return (
-    <div className="min-h-screen bg-cream text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
         <Sidebar current={section} onChange={setSection} />
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
           <TopBar />
-          <main className="px-6 py-6 lg:px-10 lg:py-8">
+          <main className="flex-1 px-6 py-6 lg:px-8 lg:py-7">
             {section === "dashboard" && <DashboardHome onGoTurmas={() => setSection("turmas")} />}
             {section === "turmas" && <GerenciarTurmas />}
             {section === "nova" && <NovaAtividade onDone={() => setSection("dashboard")} />}
@@ -63,46 +63,44 @@ function Sidebar({ current, onChange }: { current: Section; onChange: (s: Sectio
   ];
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-border bg-sidebar p-5 lg:flex lg:flex-col">
-      <Link to="/" className="mb-8 flex items-center gap-2">
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-moss text-moss-foreground">
-          <Leaf className="h-4 w-4" />
+    <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card lg:flex">
+      {/* Logo */}
+      <Link to="/" className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-moss text-moss-foreground">
+          <Leaf className="h-3.5 w-3.5" strokeWidth={2.5} />
         </div>
         <div>
-          <p className="font-display text-lg leading-none text-moss">Flora Explorer</p>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Painel Pedagógico
-          </p>
+          <p className="text-sm font-semibold leading-tight text-foreground">Flora Explorer</p>
+          <p className="text-[11px] text-muted-foreground">Painel pedagógico</p>
         </div>
       </Link>
 
-      <nav className="space-y-1">
+      {/* Nav */}
+      <nav className="flex-1 space-y-0.5 px-3 py-4">
         {items.map((it) => (
           <button
             key={it.key}
             onClick={() => onChange(it.key)}
-            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
               current === it.key
-                ? "bg-moss text-moss-foreground"
-                : "text-foreground hover:bg-secondary"
+                ? "bg-moss/10 text-moss"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
             }`}
           >
-            <it.icon className="h-4 w-4" />
+            <it.icon className="h-4 w-4 shrink-0" />
             {it.label}
           </button>
         ))}
       </nav>
 
-      <div className="mt-auto rounded-2xl border border-moss/15 bg-card p-4">
-        <p className="text-xs font-semibold text-moss">Versão Aluno</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          Veja como os alunos enxergam o app no celular.
-        </p>
+      {/* Footer */}
+      <div className="border-t border-border px-4 py-4">
+        <p className="text-xs font-medium text-muted-foreground">Ver app do aluno</p>
         <Link
           to="/app"
-          className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-terracotta"
+          className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-moss hover:underline"
         >
-          Abrir app mobile <ChevronRight className="h-3 w-3" />
+          Abrir simulação <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
     </aside>
@@ -111,27 +109,27 @@ function Sidebar({ current, onChange }: { current: Section; onChange: (s: Sectio
 
 function TopBar() {
   return (
-    <header className="flex items-center justify-between border-b border-border bg-cream px-6 py-4 lg:px-10">
+    <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3.5 lg:px-8">
       <div className="flex items-center gap-3">
         <Link to="/" className="lg:hidden">
-          <ArrowLeft className="h-4 w-4 text-moss" />
+          <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </Link>
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Bom dia</p>
-          <h1 className="font-display text-2xl leading-tight text-moss">Olá, Eliana!</h1>
+          <p className="text-[11px] text-muted-foreground">Painel · Profª Eliana</p>
+          <h1 className="text-base font-semibold leading-tight text-foreground">Olá, Eliana!</h1>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <button className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground sm:flex">
-          <Calendar className="h-3.5 w-3.5" /> Turmas ativas: <span className="text-moss">2</span>
+      <div className="flex items-center gap-2">
+        <button className="hidden items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground sm:flex hover:border-moss/40 hover:text-moss transition">
+          <Calendar className="h-3.5 w-3.5" /> 2 turmas ativas
         </button>
-        <button className="grid h-9 w-9 place-items-center rounded-full bg-card border border-border">
-          <Bell className="h-4 w-4 text-moss" />
+        <button className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background hover:border-moss/40 transition">
+          <Bell className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
         <img
           src={assets.eliana}
           alt="Eliana"
-          className="h-10 w-10 rounded-full object-cover ring-2 ring-moss/20"
+          className="h-8 w-8 rounded-lg object-cover ring-1 ring-border"
         />
       </div>
     </header>
@@ -142,31 +140,36 @@ function TopBar() {
 function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
   return (
     <div className="space-y-6">
+      {/* Page title */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">Visão geral do engajamento das turmas</p>
+      </div>
+
       {/* row 1: chart + alerts */}
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader title="Resumo de Engajamento" subtitle="Alunos que completaram missões (%)" />
+          <CardHeader title="Resumo de Engajamento" subtitle="Missões concluídas por turma (%)" />
           <EngagementChart />
         </Card>
 
-        <Card className="bg-invasive/8 border-invasive/30">
-          <div className="flex items-start gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-invasive text-invasive-foreground">
-              <AlertTriangle className="h-5 w-5" />
+        <Card className="border-invasive/20 bg-invasive/5">
+          <div className="flex items-start gap-4">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-invasive/12">
+              <AlertTriangle className="h-5 w-5 text-invasive" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-invasive">
-                Alerta · Meio Ambiente
+              <p className="text-xs font-semibold uppercase tracking-widest text-invasive">
+                Alerta ambiental
               </p>
-              <h3 className="mt-1 font-display text-xl leading-tight text-foreground">
+              <h3 className="mt-2 text-base font-bold leading-snug text-foreground">
                 Alta incidência de Amendoeira invasora
               </h3>
-              <p className="mt-1 text-sm text-foreground/75">
-                Detectada por alunos do 2º Ano na região do <strong>Bessa</strong>. 14 registros nos
-                últimos 7 dias.
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Detectada na região do <strong className="text-foreground">Bessa</strong>. 14 registros nos últimos 7 dias.
               </p>
-              <button className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-invasive px-3 py-1.5 text-xs font-medium text-invasive-foreground">
-                <MapPin className="h-3 w-3" /> Ver mapa completo
+              <button className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-invasive px-4 py-2 text-sm font-medium text-invasive-foreground hover:opacity-90">
+                <MapPin className="h-4 w-4" /> Ver mapa
               </button>
             </div>
           </div>
@@ -178,47 +181,42 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
         <Card className="lg:col-span-2">
           <div className="flex items-center justify-between">
             <CardHeader title="Atividades Recentes" subtitle="Status por desafio lançado" />
-            <button onClick={onGoTurmas} className="text-xs font-medium text-moss hover:underline">
+            <button onClick={onGoTurmas} className="text-sm font-medium text-moss hover:underline">
               Ver todas →
             </button>
           </div>
-          <div className="mt-2 overflow-hidden rounded-xl border border-border">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary text-left text-[11px] uppercase tracking-wider text-muted-foreground">
+          <div className="mt-4 overflow-hidden rounded-lg border border-border">
+            <table className="w-full">
+              <thead className="border-b border-border bg-secondary/60">
                 <tr>
-                  <th className="px-3 py-2">Desafio</th>
-                  <th className="px-3 py-2">Turma</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2">Prazo</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Desafio</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Turma</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Prazo</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody className="divide-y divide-border">
                 {[
-                  {
-                    d: "Explore o Parque Solon de Lucena",
-                    t: "1º Ano",
-                    s: "andamento",
-                    p: "20/06",
-                  },
+                  { d: "Explore o Parque Solon de Lucena", t: "1º Ano", s: "andamento", p: "20/06" },
                   { d: "Árvores da nossa cidade", t: "2º Ano", s: "concluido", p: "10/06" },
                   { d: "Espécies da orla de Cabo Branco", t: "3º Ano", s: "andamento", p: "25/06" },
                   { d: "Caça às invasoras no Bessa", t: "2º Ano", s: "andamento", p: "28/06" },
                 ].map((r) => (
-                  <tr key={r.d}>
-                    <td className="px-3 py-3 font-medium">{r.d}</td>
-                    <td className="px-3 py-3 text-muted-foreground">{r.t}</td>
-                    <td className="px-3 py-3">
+                  <tr key={r.d} className="hover:bg-secondary/40 transition">
+                    <td className="px-5 py-3.5 text-sm font-medium text-foreground">{r.d}</td>
+                    <td className="px-5 py-3.5 text-sm text-muted-foreground">{r.t}</td>
+                    <td className="px-5 py-3.5">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${
                           r.s === "concluido"
-                            ? "bg-moss/12 text-moss"
-                            : "bg-terracotta/15 text-terracotta"
+                            ? "bg-moss/10 text-moss"
+                            : "bg-secondary text-muted-foreground"
                         }`}
                       >
                         {r.s === "concluido" ? "Concluído" : "Em andamento"}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-muted-foreground">{r.p}</td>
+                    <td className="px-5 py-3.5 text-sm text-muted-foreground">{r.p}</td>
                   </tr>
                 ))}
               </tbody>
@@ -228,11 +226,10 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
 
         <Card>
           <CardHeader
-            title="Ranking Geral"
-            subtitle="Top alunos da semana"
+            title="Ranking da Semana"
             icon={<Trophy className="h-4 w-4 text-xp" />}
           />
-          <div className="mt-2 space-y-2">
+          <div className="mt-4 space-y-1">
             {[
               { p: 1, n: "Felipe Andrade", t: "1º Ano", xp: 560 },
               { p: 2, n: "Paulo S.", t: "1º Ano", xp: 320 },
@@ -240,24 +237,24 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
             ].map((r) => (
               <div
                 key={r.p}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+                className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary transition"
               >
                 <span
-                  className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${
+                  className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${
                     r.p === 1
-                      ? "bg-xp text-foreground"
+                      ? "bg-xp/20 text-yellow-700"
                       : r.p === 2
-                        ? "bg-sage text-moss"
-                        : "bg-terracotta/30 text-terracotta"
+                        ? "bg-sage/20 text-moss"
+                        : "bg-secondary text-muted-foreground"
                   }`}
                 >
-                  {r.p}º
+                  {r.p}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{r.n}</p>
-                  <p className="text-[11px] text-muted-foreground">{r.t}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">{r.n}</p>
+                  <p className="text-xs text-muted-foreground">{r.t}</p>
                 </div>
-                <span className="text-sm font-semibold text-moss">{r.xp} XP</span>
+                <span className="text-sm font-bold text-moss">{r.xp} XP</span>
               </div>
             ))}
           </div>
@@ -269,7 +266,11 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl border border-border bg-card p-5 ${className}`}>{children}</div>
+    <div
+      className={`rounded-xl border border-border bg-card p-6 ${className}`}
+    >
+      {children}
+    </div>
   );
 }
 function CardHeader({
@@ -282,41 +283,44 @@ function CardHeader({
   icon?: React.ReactNode;
 }) {
   return (
-    <div>
-      <h2 className="flex items-center gap-2 font-display text-lg text-moss">
+    <div className="mb-2">
+      <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
         {icon}
         {title}
       </h2>
-      {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+      {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
 
 function EngagementChart() {
   const data = [
-    { turma: "1º Ano", pct: 78 },
-    { turma: "2º Ano", pct: 64 },
-    { turma: "3º Ano", pct: 91 },
+    { turma: "1º Ano", pct: 78, count: 22 },
+    { turma: "2º Ano", pct: 64, count: 18 },
+    { turma: "3º Ano", pct: 91, count: 26 },
   ];
+  const avg = Math.round(data.reduce((s, d) => s + d.pct, 0) / data.length);
+
   return (
-    <div className="mt-4">
-      <div className="flex h-44 items-end gap-6 border-b border-border pb-2">
-        {data.map((d) => (
-          <div key={d.turma} className="flex flex-1 flex-col items-center gap-2">
-            <span className="font-display text-2xl text-moss">{d.pct}%</span>
+    <div className="mt-5 space-y-4">
+      {data.map((d) => (
+        <div key={d.turma}>
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">{d.turma}</span>
+            <span className="text-sm font-bold tabular-nums text-moss">{d.pct}%</span>
+          </div>
+          <div className="h-3 w-full overflow-hidden rounded-full bg-secondary">
             <div
-              className="w-full rounded-t-xl bg-gradient-to-t from-moss to-sage"
-              style={{ height: `${d.pct}%` }}
+              className="h-full rounded-full bg-moss transition-all duration-700"
+              style={{ width: `${d.pct}%` }}
             />
           </div>
-        ))}
-      </div>
-      <div className="mt-2 flex gap-6">
-        {data.map((d) => (
-          <p key={d.turma} className="flex-1 text-center text-xs font-medium text-muted-foreground">
-            {d.turma}
-          </p>
-        ))}
+          <p className="mt-1 text-xs text-muted-foreground">{d.count} alunos concluíram</p>
+        </div>
+      ))}
+      <div className="flex items-center justify-between border-t border-border pt-3">
+        <span className="text-sm text-muted-foreground">Média geral</span>
+        <span className="text-sm font-bold text-moss">{avg}%</span>
       </div>
     </div>
   );
@@ -335,8 +339,8 @@ function GerenciarTurmas() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Relatórios</p>
-          <h1 className="font-display text-3xl text-moss">Gerenciar Turmas</h1>
+        <h1 className="text-2xl font-bold text-foreground">Gerenciar Turmas</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Relatórios de engajamento por atividade</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Select
@@ -370,7 +374,7 @@ function GerenciarTurmas() {
       <Card className="overflow-hidden p-0">
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
           <div>
-            <h2 className="font-display text-lg text-moss">{atividade}</h2>
+            <h2 className="text-base font-semibold text-foreground">{atividade}</h2>
             <p className="text-xs text-muted-foreground">{turma} · prazo 20/06</p>
           </div>
           <div className="flex items-center gap-2">
@@ -449,18 +453,18 @@ function Kpi({
   value: string;
   tone?: "neutral" | "moss" | "invasive" | "terracotta";
 }) {
-  const ring =
+  const accent =
     tone === "moss"
-      ? "border-moss/30 bg-moss/8"
+      ? "text-moss"
       : tone === "invasive"
-        ? "border-invasive/30 bg-invasive/8"
+        ? "text-invasive"
         : tone === "terracotta"
-          ? "border-terracotta/30 bg-terracotta/10"
-          : "border-border bg-card";
+          ? "text-terracotta"
+          : "text-foreground";
   return (
-    <div className={`rounded-2xl border p-4 ${ring}`}>
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1 font-display text-3xl text-moss">{value}</p>
+    <div className="rounded-xl border border-border bg-card p-5">
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className={`mt-2 text-3xl font-bold tabular-nums ${accent}`}>{value}</p>
     </div>
   );
 }
@@ -477,12 +481,12 @@ function Select({
   options: string[];
 }) {
   return (
-    <label className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs">
+    <label className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm cursor-pointer hover:border-moss/40 transition">
       <span className="text-muted-foreground">{label}:</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-transparent font-medium text-moss outline-none"
+        className="bg-transparent font-semibold text-foreground outline-none cursor-pointer"
       >
         {options.map((o) => (
           <option key={o}>{o}</option>
@@ -496,7 +500,7 @@ function Select({
 function NovaAtividade({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState(0);
   const [turma, setTurma] = useState<Turma>("1º Ano");
-  const [drawPolygon, setDrawPolygon] = useState(false);
+  const [polyPoints, setPolyPoints] = useState<[number, number][]>([]);
   const [title, setTitle] = useState("Caça às invasoras no Bessa");
   const [description, setDescription] = useState(
     "Encontre e fotografe 3 espécies invasoras no bairro do Bessa.",
@@ -504,13 +508,14 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
   const [obligatory, setObligatory] = useState(true);
   const [done, setDone] = useState(false);
 
+  const hasPolygon = polyPoints.length >= 3;
   const steps = ["Turma", "Geofencing", "Formulário", "Lançar"];
 
   return (
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-wider text-muted-foreground">Nova Atividade</p>
-        <h1 className="font-display text-3xl text-moss">Criar um novo desafio</h1>
+        <h1 className="text-2xl font-bold text-foreground">Criar um novo desafio</h1>
       </div>
 
       {/* steps */}
@@ -537,7 +542,7 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-moss text-moss-foreground">
             <Rocket className="h-7 w-7" />
           </div>
-          <h2 className="mt-5 font-display text-3xl text-moss">Desafio lançado com sucesso!</h2>
+          <h2 className="mt-5 text-2xl font-bold text-foreground">Desafio lançado com sucesso!</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Alertas enviados para os {alunosRelatorio.length} alunos do {turma}.
           </p>
@@ -578,7 +583,7 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
                         : "border-border bg-card hover:border-moss/40"
                     }`}
                   >
-                    <p className="font-display text-2xl text-moss">{t}</p>
+                    <p className="text-base font-semibold text-foreground">{t}</p>
                     <p className="text-xs text-muted-foreground">28 alunos · Ensino Médio</p>
                   </button>
                 ))}
@@ -591,60 +596,110 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <CardHeader
                   title="Delimitar a zona no mapa"
-                  subtitle="João Pessoa · selecione a área onde os alunos devem explorar."
+                  subtitle="Clique no mapa para definir os vértices do polígono."
                 />
                 <button
-                  onClick={() => setDrawPolygon((v) => !v)}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                    drawPolygon
-                      ? "bg-moss text-moss-foreground"
-                      : "border border-moss/30 bg-card text-moss"
-                  }`}
+                  onClick={() => setPolyPoints([])}
+                  disabled={polyPoints.length === 0}
+                  className="flex items-center gap-1.5 rounded-full border border-moss/30 bg-card px-3 py-1.5 text-xs font-medium text-moss disabled:opacity-40 hover:bg-moss hover:text-moss-foreground transition"
                 >
                   <Pencil className="h-3 w-3" />
-                  {drawPolygon ? "Limpar zona" : "Desenhar zona"}
+                  Limpar zona
                 </button>
               </div>
 
-              <div className="relative overflow-hidden rounded-2xl border border-border bg-secondary">
-                <img src={mapJP} alt="Mapa de João Pessoa" className="w-full" loading="lazy" />
-                {drawPolygon && (
-                  <svg
-                    viewBox="0 0 100 67"
-                    className="pointer-events-none absolute inset-0 h-full w-full"
-                    preserveAspectRatio="none"
-                  >
+              {/* Interactive map */}
+              <div
+                className="relative overflow-hidden rounded-2xl border border-border bg-secondary"
+                style={{ cursor: "crosshair" }}
+              >
+                <img src={mapJP} alt="Mapa de João Pessoa" className="w-full pointer-events-none" loading="lazy" />
+                {/* SVG overlay for drawing */}
+                <svg
+                  viewBox="0 0 100 67"
+                  className="absolute inset-0 h-full w-full"
+                  preserveAspectRatio="none"
+                  onClick={(e) => {
+                    const rect = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 67;
+                    setPolyPoints((prev) => [...prev, [+x.toFixed(2), +y.toFixed(2)]]);
+                  }}
+                >
+                  {/* Completed polygon fill + stroke */}
+                  {polyPoints.length >= 3 && (
                     <polygon
-                      points="62,18 80,22 84,38 72,52 56,46 54,30"
-                      fill="oklch(0.62 0.13 45 / 0.25)"
+                      points={polyPoints.map(([x, y]) => `${x},${y}`).join(" ")}
+                      fill="oklch(0.62 0.13 45 / 0.22)"
+                      stroke="oklch(0.62 0.13 45)"
+                      strokeWidth="0.6"
+                      strokeDasharray="1.5 0.8"
+                      style={{ cursor: "pointer" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPolyPoints([]);
+                      }}
+                    />
+                  )}
+                  {/* Line preview connecting dots */}
+                  {polyPoints.length >= 2 && (
+                    <polyline
+                      points={polyPoints.map(([x, y]) => `${x},${y}`).join(" ")}
+                      fill="none"
                       stroke="oklch(0.62 0.13 45)"
                       strokeWidth="0.5"
-                      strokeDasharray="1.2 0.8"
+                      strokeDasharray="1.5 0.8"
                     />
-                    {[
-                      [62, 18],
-                      [80, 22],
-                      [84, 38],
-                      [72, 52],
-                      [56, 46],
-                      [54, 30],
-                    ].map(([x, y], i) => (
-                      <circle
-                        key={i}
-                        cx={x}
-                        cy={y}
-                        r="1.2"
-                        fill="oklch(0.62 0.13 45)"
-                        stroke="white"
-                        strokeWidth="0.4"
-                      />
-                    ))}
-                  </svg>
-                )}
-                {drawPolygon && (
+                  )}
+                  {/* Vertices */}
+                  {polyPoints.map(([x, y], i) => (
+                    <circle
+                      key={i}
+                      cx={x}
+                      cy={y}
+                      r="1.4"
+                      fill="oklch(0.62 0.13 45)"
+                      stroke="white"
+                      strokeWidth="0.5"
+                    />
+                  ))}
+                  {/* Closing line preview */}
+                  {polyPoints.length >= 2 && polyPoints.length < 3 && (
+                    <line
+                      x1={polyPoints[polyPoints.length - 1][0]}
+                      y1={polyPoints[polyPoints.length - 1][1]}
+                      x2={polyPoints[0][0]}
+                      y2={polyPoints[0][1]}
+                      stroke="oklch(0.62 0.13 45 / 0.4)"
+                      strokeWidth="0.4"
+                      strokeDasharray="0.8 0.8"
+                    />
+                  )}
+                </svg>
+
+                {/* Status badge */}
+                <div className="absolute top-3 right-3 rounded-xl bg-card/95 px-3 py-1.5 text-xs shadow-lg backdrop-blur-sm">
+                  {polyPoints.length === 0 && (
+                    <p className="text-muted-foreground">Clique para adicionar pontos</p>
+                  )}
+                  {polyPoints.length === 1 && (
+                    <p className="text-terracotta font-medium">1 ponto — adicione mais 2+</p>
+                  )}
+                  {polyPoints.length === 2 && (
+                    <p className="text-terracotta font-medium">2 pontos — mais 1 para fechar</p>
+                  )}
+                  {hasPolygon && (
+                    <div>
+                      <p className="font-semibold text-moss">{polyPoints.length} vértices definidos</p>
+                      <p className="text-muted-foreground">Clique no polígono para apagar</p>
+                    </div>
+                  )}
+                </div>
+
+                {hasPolygon && (
                   <div className="absolute bottom-3 left-3 rounded-xl bg-card/95 px-3 py-2 text-xs shadow-lg backdrop-blur-sm">
-                    <p className="font-semibold text-moss">Zona definida</p>
-                    <p className="text-muted-foreground">~2,4 km² · região do Bessa / Manaíra</p>
+                    <p className="font-semibold text-moss">Zona definida ✓</p>
+                    <p className="text-muted-foreground">~{(polyPoints.length * 0.4).toFixed(1)} km² estimado</p>
                   </div>
                 )}
               </div>
@@ -655,6 +710,7 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
               </p>
             </div>
           )}
+
 
           {step === 2 && (
             <div className="space-y-4">
@@ -711,7 +767,7 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
                 <Review label="Turma" value={turma} />
                 <Review
                   label="Zona no mapa"
-                  value={drawPolygon ? "Bessa / Manaíra (~2,4 km²)" : "Sem geofencing"}
+                  value={hasPolygon ? `Zona customizada · ${polyPoints.length} vértices` : "Sem geofencing"}
                 />
                 <Review label="Título" value={title} />
                 <Review label="Prazo" value="28/06/2026" />
@@ -754,7 +810,7 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-muted-foreground">{label}</span>
+      <span className="mb-2 block text-sm font-semibold text-foreground">{label}</span>
       {children}
     </label>
   );
@@ -771,15 +827,15 @@ function Review({ label, value }: { label: string; value: string }) {
 /* ---------------- CONFIG ---------------- */
 function Configuracoes() {
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-8 max-w-5xl mx-auto">
       <div>
-        <p className="text-xs uppercase tracking-wider text-muted-foreground">Configurações</p>
-        <h1 className="font-display text-3xl text-moss">Sua conta e integrações</h1>
+        <h1 className="text-3xl font-bold text-foreground">Sua conta e integrações</h1>
+        <p className="mt-1 text-base text-muted-foreground">Gerencie suas informações e conexões</p>
       </div>
 
-      <Card>
+      <Card className="p-8">
         <CardHeader title="Integrações" subtitle="Sincronize com ferramentas pedagógicas." />
-        <div className="mt-4 space-y-3">
+        <div className="mt-6 space-y-4">
           <IntegrationRow
             name="Google Sala de Aula"
             desc="Sincronize turmas e lance atividades direto no Classroom."
@@ -792,31 +848,31 @@ function Configuracoes() {
         </div>
       </Card>
 
-      <Card>
+      <Card className="p-8">
         <CardHeader title="Dados da Conta" subtitle="Profª Eliana M. · UFPB" />
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <Field label="Nome completo">
             <input
               defaultValue="Eliana Mendes"
-              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
           <Field label="E-mail institucional">
             <input
               defaultValue="eliana.mendes@escola.pb.gov.br"
-              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
           <Field label="Escola">
             <input
               defaultValue="EEEFM Olivina Olívia"
-              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
           <Field label="Disciplina">
             <input
               defaultValue="Biologia · Ensino Médio"
-              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
         </div>
@@ -835,19 +891,19 @@ function IntegrationRow({
   connected?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-cream p-3">
-      <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-card text-moss">
-          <Leaf className="h-4 w-4" />
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-cream p-5">
+      <div className="flex items-start sm:items-center gap-4">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-card text-moss shadow-sm">
+          <Leaf className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-sm font-semibold">{name}</p>
-          <p className="text-xs text-muted-foreground">{desc}</p>
+          <p className="text-base font-bold">{name}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{desc}</p>
         </div>
       </div>
       <button
-        className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-          connected ? "bg-moss/12 text-moss" : "bg-moss text-moss-foreground"
+        className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition sm:shrink-0 ${
+          connected ? "bg-moss/12 text-moss hover:bg-moss/20" : "bg-moss text-moss-foreground hover:opacity-90"
         }`}
       >
         {connected ? "Conectado ✓" : "Conectar"}
