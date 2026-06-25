@@ -537,9 +537,10 @@ function BottomNav({
   return (
     <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-border bg-card/95 backdrop-blur-lg">
       <div className="grid grid-cols-5 items-end px-2 pb-3 pt-2">
-        {items.map((it) => (
-          <NavBtn key={it.key} {...it} active={current === it.key} onClick={() => onChange(it.key)} />
-        ))}
+        {items.map((it) => {
+          const { key, ...rest } = it;
+          return <NavBtn key={key} {...rest} active={current === key} onClick={() => onChange(key)} />;
+        })}
         <button
           onClick={onCapture}
           className="-mt-8 mx-auto grid h-16 w-16 place-items-center rounded-full bg-moss text-moss-foreground ring-4 ring-background shadow-lg"
@@ -547,9 +548,10 @@ function BottomNav({
           <Camera className="h-6 w-6" />
         </button>
         <NavBtn key="cat-stub" label="Mapa" icon={Leaf} active={false} onClick={() => onChange("catalog")} />
-        {right.map((it) => (
-          <NavBtn key={it.key} {...it} active={current === it.key} onClick={() => onChange(it.key)} />
-        ))}
+        {right.map((it) => {
+          const { key, ...rest } = it;
+          return <NavBtn key={key} {...rest} active={current === key} onClick={() => onChange(key)} />;
+        })}
       </div>
     </div>
   );
