@@ -83,12 +83,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Jogo educativo de exploração da flora urbana de João Pessoa. Protótipo navegável com versão Aluno (App) e Professora (Web).",
       },
-      { property: "og:title", content: "Flora Explorer JP" },
+      { property: "og:title", content: "Flora Explorer JP — Protótipo" },
       {
         property: "og:description",
         content: "Explore a Mata Atlântica de João Pessoa — protótipo navegável.",
       },
       { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "Flora Explorer JP — Protótipo" },
+      { name: "description", content: "Flora Explorer JP is an educational app for high school students to identify and learn about plants." },
+      { property: "og:description", content: "Flora Explorer JP is an educational app for high school students to identify and learn about plants." },
+      { name: "twitter:description", content: "Flora Explorer JP is an educational app for high school students to identify and learn about plants." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/889e2b0b-ac8f-4a8f-b93e-50c1b2925a38/id-preview-8775f587--cab2fbf7-8d52-4f32-b0bd-8969264925d7.lovable.app-1782358621138.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/889e2b0b-ac8f-4a8f-b93e-50c1b2925a38/id-preview-8775f587--cab2fbf7-8d52-4f32-b0bd-8969264925d7.lovable.app-1782358621138.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
