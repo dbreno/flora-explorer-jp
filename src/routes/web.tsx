@@ -21,9 +21,29 @@ import {
   Sparkles,
   Calendar,
   Pencil,
+  Menu,
+  HelpCircle,
 } from "lucide-react";
-import { alunosRelatorio, turmas, type Turma, assets } from "@/lib/flora-data";
+import {
+  alunosRelatorio,
+  turmas,
+  atividadesProfessora,
+  FAQ_TEACHER,
+  TEACHER_NOTIFICATIONS,
+  getRelatorioFiltrado,
+  exportRelatorioCsv,
+  type Turma,
+  assets,
+} from "@/lib/flora-data";
 import mapJP from "@/assets/joao-pessoa-map.jpg";
+import { HelpDialog } from "@/components/flora/HelpDialog";
+import { NotificationsDialog } from "@/components/flora/NotificationsDialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/web")({
   component: WebDashboard,
@@ -31,86 +51,183 @@ export const Route = createFileRoute("/web")({
 
 type Section = "dashboard" | "turmas" | "nova" | "config";
 
+const NAV_ITEMS: { key: Section; label: string; icon: React.ElementType }[] = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "turmas", label: "Gerenciar Turmas", icon: Users },
+  { key: "nova", label: "Nova Atividade", icon: PlusSquare },
+  { key: "config", label: "Configurações", icon: Settings },
+];
+
 function WebDashboard() {
   const [section, setSection] = useState<Section>("dashboard");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  const goToSection = (s: Section) => {
+    setSection(s);
+    setMobileNavOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
-        <Sidebar current={section} onChange={setSection} />
+        <Sidebar current={section} onChange={goToSection} />
 
         <div className="flex-1 min-w-0 flex flex-col">
-          <TopBar />
+          <TopBar
+            onOpenNav={() => setMobileNavOpen(true)}
+            onHelp={() => setHelpOpen(true)}
+            onNotifications={() => setNotificationsOpen(true)}
+          />
           <main className="flex-1 px-6 py-6 lg:px-8 lg:py-7">
-            {section === "dashboard" && <DashboardHome onGoTurmas={() => setSection("turmas")} />}
+            {section === "dashboard" && <DashboardHome onGoTurmas={() => goToSection("turmas")} />}
             {section === "turmas" && <GerenciarTurmas />}
-            {section === "nova" && <NovaAtividade onDone={() => setSection("dashboard")} />}
+            {section === "nova" && <NovaAtividade onDone={() => goToSection("dashboard")} />}
             {section === "config" && <Configuracoes />}
           </main>
         </div>
       </div>
+
+      <MobileNavSheet
+        open={mobileNavOpen}
+        onOpenChange={setMobileNavOpen}
+        current={section}
+        onChange={goToSection}
+      />
+
+      <HelpDialog
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        items={FAQ_TEACHER}
+        title="Ajuda — Painel Pedagógico"
+        description="Perguntas frequentes para professores"
+      />
+      <NotificationsDialog
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
+        notifications={TEACHER_NOTIFICATIONS}
+      />
     </div>
   );
 }
 
 /* ---------------- SIDEBAR ---------------- */
 function Sidebar({ current, onChange }: { current: Section; onChange: (s: Section) => void }) {
-  const items: { key: Section; label: string; icon: React.ElementType }[] = [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { key: "turmas", label: "Gerenciar Turmas", icon: Users },
-    { key: "nova", label: "Nova Atividade", icon: PlusSquare },
-    { key: "config", label: "Configurações", icon: Settings },
-  ];
-
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card lg:flex">
-      {/* Logo */}
-      <Link to="/" className="flex items-center gap-2.5 border-b border-border px-5 py-4">
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-moss text-moss-foreground">
-          <Leaf className="h-3.5 w-3.5" strokeWidth={2.5} />
-        </div>
-        <div>
-          <p className="text-sm font-semibold leading-tight text-foreground">Flora Explorer</p>
-          <p className="text-[11px] text-muted-foreground">Painel pedagógico</p>
-        </div>
-      </Link>
-
-      {/* Nav */}
-      <nav className="flex-1 space-y-0.5 px-3 py-4">
-        {items.map((it) => (
-          <button
-            key={it.key}
-            onClick={() => onChange(it.key)}
-            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
-              current === it.key
-                ? "bg-moss/10 text-moss"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-            }`}
-          >
-            <it.icon className="h-4 w-4 shrink-0" />
-            {it.label}
-          </button>
-        ))}
-      </nav>
-
-      {/* Footer */}
-      <div className="border-t border-border px-4 py-4">
-        <p className="text-xs font-medium text-muted-foreground">Ver app do aluno</p>
-        <Link
-          to="/app"
-          className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-moss hover:underline"
-        >
-          Abrir simulação <ChevronRight className="h-3 w-3" />
-        </Link>
-      </div>
+      <SidebarHeader />
+      <NavList current={current} onChange={onChange} />
+      <SidebarFooter />
     </aside>
   );
 }
 
-function TopBar() {
+function MobileNavSheet({
+  open,
+  onOpenChange,
+  current,
+  onChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  current: Section;
+  onChange: (s: Section) => void;
+}) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="left" className="w-64 p-0">
+        <SheetHeader className="border-b border-border px-5 py-4 text-left">
+          <SheetTitle className="text-sm font-semibold">Flora Explorer</SheetTitle>
+          <p className="text-[11px] text-muted-foreground">Painel pedagógico</p>
+        </SheetHeader>
+        <div className="px-3 py-4">
+          <NavList current={current} onChange={onChange} />
+        </div>
+        <div className="border-t border-border px-4 py-4">
+          <SidebarFooter />
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function SidebarHeader() {
+  return (
+    <Link to="/" className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-moss text-moss-foreground">
+        <Leaf className="h-3.5 w-3.5" strokeWidth={2.5} />
+      </div>
+      <div>
+        <p className="text-sm font-semibold leading-tight text-foreground">Flora Explorer</p>
+        <p className="text-[11px] text-muted-foreground">Painel pedagógico</p>
+      </div>
+    </Link>
+  );
+}
+
+function NavList({
+  current,
+  onChange,
+}: {
+  current: Section;
+  onChange: (s: Section) => void;
+}) {
+  return (
+    <nav className="flex-1 space-y-0.5">
+      {NAV_ITEMS.map((it) => (
+        <button
+          key={it.key}
+          type="button"
+          onClick={() => onChange(it.key)}
+          className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+            current === it.key
+              ? "bg-moss/10 text-moss"
+              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+          }`}
+        >
+          <it.icon className="h-4 w-4 shrink-0" />
+          {it.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function SidebarFooter() {
+  return (
+    <>
+      <p className="text-xs font-medium text-muted-foreground">Ver app do aluno</p>
+      <Link
+        to="/app"
+        className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-moss hover:underline"
+      >
+        Abrir simulação <ChevronRight className="h-3 w-3" />
+      </Link>
+    </>
+  );
+}
+
+function TopBar({
+  onOpenNav,
+  onHelp,
+  onNotifications,
+}: {
+  onOpenNav: () => void;
+  onHelp: () => void;
+  onNotifications: () => void;
+}) {
   return (
     <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3.5 lg:px-8">
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onOpenNav}
+          className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background lg:hidden hover:border-moss/40 transition"
+          aria-label="Abrir menu"
+        >
+          <Menu className="h-4 w-4 text-muted-foreground" />
+        </button>
         <Link to="/" className="lg:hidden">
           <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </Link>
@@ -120,10 +237,26 @@ function TopBar() {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button className="hidden items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground sm:flex hover:border-moss/40 hover:text-moss transition">
+        <button
+          type="button"
+          className="hidden items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground sm:flex hover:border-moss/40 hover:text-moss transition"
+        >
           <Calendar className="h-3.5 w-3.5" /> 2 turmas ativas
         </button>
-        <button className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background hover:border-moss/40 transition">
+        <button
+          type="button"
+          onClick={onHelp}
+          className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background hover:border-moss/40 transition"
+          aria-label="Ajuda"
+        >
+          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+        <button
+          type="button"
+          onClick={onNotifications}
+          className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background hover:border-moss/40 transition"
+          aria-label="Notificações"
+        >
           <Bell className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
         <img
@@ -328,65 +461,98 @@ function EngagementChart() {
 
 /* ---------------- GERENCIAR TURMAS / RELATÓRIO ---------------- */
 function GerenciarTurmas() {
+  const defaultAtividade = atividadesProfessora[0]?.titulo ?? "Explore o Parque Solon de Lucena";
   const [turma, setTurma] = useState<Turma>("1º Ano");
-  const [atividade, setAtividade] = useState("Explore o Parque Solon de Lucena");
+  const [atividade, setAtividade] = useState(defaultAtividade);
+  const [search, setSearch] = useState("");
+  const [exportMsg, setExportMsg] = useState("");
 
-  const total = alunosRelatorio.length;
-  const fizeram = alunosRelatorio.filter((a) => a.status === "fez").length;
-  const pct = Math.round((fizeram / total) * 100);
+  const atividadeOptions = atividadesProfessora
+    .filter((a) => a.turma === turma)
+    .map((a) => a.titulo);
+
+  const handleTurmaChange = (v: string) => {
+    const t = v as Turma;
+    setTurma(t);
+    const first = atividadesProfessora.find((a) => a.turma === t);
+    if (first) setAtividade(first.titulo);
+    setSearch("");
+  };
+
+  const { rows, kpis, prazo } = getRelatorioFiltrado(turma, atividade, search);
+
+  const handleExport = () => {
+    exportRelatorioCsv(rows, `relatorio-${turma.replace(/\s/g, "-")}.csv`);
+    setExportMsg("CSV baixado com sucesso.");
+    setTimeout(() => setExportMsg(""), 3000);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-        <h1 className="text-2xl font-bold text-foreground">Gerenciar Turmas</h1>
+          <h1 className="text-2xl font-bold text-foreground">Gerenciar Turmas</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Relatórios de engajamento por atividade</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Select
             label="Turma"
             value={turma}
-            onChange={(v) => setTurma(v as Turma)}
+            onChange={handleTurmaChange}
             options={[...turmas]}
           />
           <Select
             label="Atividade"
             value={atividade}
-            onChange={setAtividade}
-            options={[
-              "Explore o Parque Solon de Lucena",
-              "Árvores da nossa cidade",
-              "Caça às invasoras no Bessa",
-            ]}
+            onChange={(v) => {
+              setAtividade(v);
+              setSearch("");
+            }}
+            options={atividadeOptions.length > 0 ? atividadeOptions : [defaultAtividade]}
           />
         </div>
       </div>
 
-      {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-4">
-        <Kpi label="Alunos na turma" value={String(total)} />
-        <Kpi label="Concluíram" value={String(fizeram)} tone="moss" />
-        <Kpi label="Não fizeram" value={String(total - fizeram)} tone="invasive" />
-        <Kpi label="Engajamento" value={`${pct}%`} tone="terracotta" />
+        <Kpi label="Alunos na turma" value={String(kpis.total)} />
+        <Kpi label="Concluíram" value={String(kpis.fizeram)} tone="moss" />
+        <Kpi label="Não fizeram" value={String(kpis.naoFizeram)} tone="invasive" />
+        <Kpi label="Engajamento" value={`${kpis.pct}%`} tone="terracotta" />
       </div>
 
-      {/* Tabela detalhada */}
       <Card className="overflow-hidden p-0">
-        <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+        <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-base font-semibold text-foreground">{atividade}</h2>
-            <p className="text-xs text-muted-foreground">{turma} · prazo 20/06</p>
+            <p className="text-xs text-muted-foreground">
+              {turma} · prazo {prazo}
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-2 rounded-full border border-border bg-cream px-3 py-1.5 text-xs sm:flex">
-              <Search className="h-3 w-3 text-muted-foreground" />
-              <input placeholder="Buscar aluno…" className="w-32 bg-transparent outline-none" />
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 rounded-full border border-border bg-cream px-3 py-1.5 text-xs">
+              <Search className="h-3 w-3 shrink-0 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar aluno…"
+                className="w-full min-w-[120px] bg-transparent outline-none sm:w-32"
+              />
             </div>
-            <button className="flex items-center gap-1.5 rounded-full bg-moss px-3 py-1.5 text-xs font-medium text-moss-foreground">
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={rows.length === 0}
+              className="flex items-center gap-1.5 rounded-full bg-moss px-3 py-1.5 text-xs font-medium text-moss-foreground disabled:opacity-40"
+            >
               <Download className="h-3 w-3" /> Exportar CSV
             </button>
           </div>
         </div>
+        {exportMsg && (
+          <p className="border-b border-border bg-moss/8 px-5 py-2 text-xs font-medium text-moss">
+            {exportMsg}
+          </p>
+        )}
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -400,42 +566,50 @@ function GerenciarTurmas() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {alunosRelatorio.map((a) => (
-                <tr key={a.name} className="hover:bg-secondary/50">
-                  <td className="px-5 py-3 font-medium">{a.name}</td>
-                  <td className="px-5 py-3">
-                    {a.status === "fez" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-moss/12 px-2 py-0.5 text-[11px] font-medium text-moss">
-                        <CheckCircle2 className="h-3 w-3" /> Fez
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-invasive/10 px-2 py-0.5 text-[11px] font-medium text-invasive">
-                        <XCircle className="h-3 w-3" /> Não fez
-                      </span>
-                    )}
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted-foreground">
+                    Nenhum aluno encontrado.
                   </td>
-                  <td className="px-5 py-3">
-                    {a.plantas.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {a.plantas.map((p) => (
-                          <span
-                            key={p}
-                            className="rounded-full bg-sage/25 px-2 py-0.5 text-[11px] font-medium text-moss"
-                          >
-                            🌿 {p}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-right font-semibold text-moss">
-                    {a.xp > 0 ? `${a.xp} XP` : "—"}
-                  </td>
-                  <td className="px-5 py-3 text-right text-muted-foreground">{a.data}</td>
                 </tr>
-              ))}
+              ) : (
+                rows.map((a) => (
+                  <tr key={a.name} className="hover:bg-secondary/50">
+                    <td className="px-5 py-3 font-medium">{a.name}</td>
+                    <td className="px-5 py-3">
+                      {a.status === "fez" ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-moss/12 px-2 py-0.5 text-[11px] font-medium text-moss">
+                          <CheckCircle2 className="h-3 w-3" /> Fez
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-invasive/10 px-2 py-0.5 text-[11px] font-medium text-invasive">
+                          <XCircle className="h-3 w-3" /> Não fez
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      {a.plantas.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {a.plantas.map((p) => (
+                            <span
+                              key={p}
+                              className="rounded-full bg-sage/25 px-2 py-0.5 text-[11px] font-medium text-moss"
+                            >
+                              🌿 {p}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-right font-semibold text-moss">
+                      {a.xp > 0 ? `${a.xp} XP` : "—"}
+                    </td>
+                    <td className="px-5 py-3 text-right text-muted-foreground">{a.data}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -708,6 +882,11 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
                 <Sparkles className="mr-1 inline h-3 w-3" />
                 Estimativa: <strong>120 espécies catalogadas</strong> nesta zona segura.
               </p>
+              {step === 1 && !hasPolygon && (
+                <p className="text-xs text-terracotta">
+                  Defina pelo menos 3 pontos no mapa para continuar.
+                </p>
+              )}
             </div>
           )}
 
@@ -794,8 +973,13 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
             </button>
             {step < 3 && (
               <button
-                onClick={() => setStep((s) => s + 1)}
-                className="flex items-center gap-1 rounded-full bg-moss px-4 py-1.5 text-sm font-medium text-moss-foreground"
+                type="button"
+                onClick={() => {
+                  if (step === 1 && !hasPolygon) return;
+                  setStep((s) => s + 1);
+                }}
+                disabled={step === 1 && !hasPolygon}
+                className="flex items-center gap-1 rounded-full bg-moss px-4 py-1.5 text-sm font-medium text-moss-foreground disabled:opacity-40"
               >
                 Continuar <ArrowRight className="h-4 w-4" />
               </button>
