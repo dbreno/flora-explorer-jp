@@ -64,12 +64,15 @@ export const ranking = [
   { pos: 5, name: "Júlia Costa", xp: 210, you: false },
 ];
 
+export type MissionStatus = "ativa" | "atrasada" | "encerrada";
+
 export type Mission = {
   id: string;
   title: string;
   progress: number;
   total: number;
   deadline: string;
+  status: MissionStatus;
 };
 
 export const missoes: Mission[] = [
@@ -78,21 +81,24 @@ export const missoes: Mission[] = [
     title: "Explore o Parque Solon de Lucena",
     progress: 1,
     total: 5,
-    deadline: "20/06",
+    deadline: "25/07",
+    status: "ativa",
   },
   {
     id: "arvores",
     title: "Árvores da nossa cidade",
     progress: 2,
     total: 8,
-    deadline: "10/06",
+    deadline: "10/07",
+    status: "atrasada",
   },
   {
     id: "orla",
     title: "Espécies da orla de Cabo Branco",
     progress: 0,
     total: 6,
-    deadline: "25/06",
+    deadline: "15/08",
+    status: "ativa",
   },
 ];
 

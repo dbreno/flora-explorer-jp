@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
 import {
   Home,
   BookOpen,
@@ -34,6 +34,7 @@ import {
   getStudentNotifications,
   type Plant,
   type Mission,
+  type MissionStatus,
 } from "@/lib/flora-data";
 import {
   Dialog,
@@ -44,6 +45,17 @@ import {
 } from "@/components/ui/dialog";
 import { HelpDialog } from "@/components/flora/HelpDialog";
 import { NotificationsDialog } from "@/components/flora/NotificationsDialog";
+import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/app")({
   component: AppMobile,
@@ -62,6 +74,7 @@ type CaptureContext = {
   missionId?: string;
   missionTitle?: string;
   preferInvasive?: boolean;
+  locationLabel?: string;
 };
 
 function AppMobile() {
@@ -215,7 +228,264 @@ function PlantDetailDialog({
   );
 }
 
+const PROFILE_AVATARS = [
+  { id: "paulo", src: assets.paulo, label: "Avatar Paulo" },
+  { id: "eliana", src: assets.eliana, label: "Avatar Eliana" },
+] as const;
+
+function EditProfileDialog({
+  open,
+  onOpenChange,
+  name,
+  avatarSrc,
+  onSave,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  name: string;
+  avatarSrc: string;
+  onSave: (data: { name: string; avatarSrc: string }) => void;
+}) {
+  const [draftName, setDraftName] = useState(name);
+  const [draftAvatar, setDraftAvatar] = useState(avatarSrc);
+
+  useEffect(() => {
+    if (open) {
+      setDraftName(name);
+      setDraftAvatar(avatarSrc);
+    }
+  }, [open, name, avatarSrc]);
+
+  const handleSave = () => {
+    const trimmed = draftName.trim();
+    if (!trimmed) return;
+    onSave({ name: trimmed, avatarSrc: draftAvatar });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Editar perfil</DialogTitle>
+          <DialogDescription>Altere seu nome de exibição e avatar.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="profile-name" className="text-sm font-medium text-foreground">
+              Nome
+            </label>
+            <Input
+              id="profile-name"
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              placeholder="Seu nome"
+              maxLength={40}
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">Avatar</p>
+            <div className="flex gap-3">
+              {PROFILE_AVATARS.map((avatar) => (
+                <button
+                  key={avatar.id}
+                  type="button"
+                  onClick={() => setDraftAvatar(avatar.src)}
+                  className={`rounded-2xl p-0.5 transition ${
+                    draftAvatar === avatar.src
+                      ? "ring-2 ring-moss ring-offset-2 ring-offset-background"
+                      : "ring-1 ring-border opacity-80 hover:opacity-100"
+                  }`}
+                  aria-label={avatar.label}
+                  aria-pressed={draftAvatar === avatar.src}
+                >
+                  <img
+                    src={avatar.src}
+                    alt={avatar.label}
+                    className="h-16 w-16 rounded-[14px] object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-secondary"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!draftName.trim()}
+              className="flex-1 rounded-xl bg-moss px-4 py-2.5 text-sm font-medium text-moss-foreground transition hover:opacity-90 disabled:opacity-50"
+            >
+              Salvar
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PrivacyToggle({
+  label,
+  description,
+  on,
+  onToggle,
+}: {
+  label: string;
+  description: string;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full items-start gap-3 rounded-xl px-1 py-2 text-left transition hover:bg-secondary/60"
+    >
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+      </div>
+      <div
+        className={`mt-0.5 flex h-6 w-10 shrink-0 items-center rounded-full transition ${
+          on ? "bg-moss" : "bg-secondary"
+        }`}
+        aria-hidden
+      >
+        <div
+          className={`h-5 w-5 rounded-full bg-card transition ${
+            on ? "translate-x-[18px]" : "translate-x-0.5"
+          }`}
+        />
+      </div>
+    </button>
+  );
+}
+
+function PrivacyDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [camera, setCamera] = useState(true);
+  const [location, setLocation] = useState(true);
+  const [usage, setUsage] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Privacidade e Permissões</DialogTitle>
+          <DialogDescription>
+            Controle o que o app pode usar neste protótipo. As alterações valem só nesta sessão.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-1 divide-y divide-border">
+          <PrivacyToggle
+            label="Câmera"
+            description="Permitir captura de fotos nas missões"
+            on={camera}
+            onToggle={() => setCamera((v) => !v)}
+          />
+          <PrivacyToggle
+            label="Localização"
+            description="Compartilhar posição nas missões e no mapa"
+            on={location}
+            onToggle={() => setLocation((v) => !v)}
+          />
+          <PrivacyToggle
+            label="Dados de uso"
+            description="Melhorar o app com estatísticas anônimas"
+            on={usage}
+            onToggle={() => setUsage((v) => !v)}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => onOpenChange(false)}
+          className="mt-2 w-full rounded-xl bg-moss px-4 py-2.5 text-sm font-medium text-moss-foreground transition hover:opacity-90"
+        >
+          Fechar
+        </button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ---------------- HOME ---------------- */
+
+function missionStatusLabel(status: MissionStatus): string {
+  if (status === "atrasada") return "Atrasada";
+  if (status === "encerrada") return "Encerrada";
+  return "Ativa";
+}
+
+function missionStatusClass(status: MissionStatus): string {
+  if (status === "atrasada") return "bg-invasive/12 text-invasive";
+  if (status === "encerrada") return "bg-secondary text-muted-foreground";
+  return "bg-moss/10 text-moss";
+}
+
+type RankingEntry = (typeof ranking)[number];
+
+function RankingRow({ entry }: { entry: RankingEntry }) {
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm ${
+        entry.you ? "bg-moss/8 ring-1 ring-moss/20" : ""
+      }`}
+    >
+      <span
+        className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-bold ${
+          entry.pos === 1
+            ? "bg-xp/20 text-yellow-700"
+            : entry.pos === 2
+              ? "bg-sage/20 text-moss"
+              : "bg-secondary text-muted-foreground"
+        }`}
+      >
+        {entry.pos}
+      </span>
+      <span className="flex-1 truncate font-medium text-foreground">
+        {entry.name}
+        {entry.you && " (você)"}
+      </span>
+      <span className="font-bold text-moss">{entry.xp} XP</span>
+    </div>
+  );
+}
+
+function RankingDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Ranking da turma</DialogTitle>
+          <DialogDescription>1º Ano · você está em 2º lugar</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-1">
+          {ranking.map((r) => (
+            <RankingRow key={r.pos} entry={r} />
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function HomeScreen({
   missions,
@@ -226,6 +496,7 @@ function HomeScreen({
 }) {
   const [helpOpen, setHelpOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [rankingOpen, setRankingOpen] = useState(false);
 
   return (
     <>
@@ -242,7 +513,11 @@ function HomeScreen({
                 <img src={assets.paulo} alt="Paulo" className="h-full w-full object-cover" />
               </div>
             </div>
-            <div className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full border-[2.5px] border-background bg-moss text-xs font-bold text-moss-foreground shadow-sm">
+            <div
+              className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full border-[2.5px] border-background bg-moss text-xs font-bold text-moss-foreground shadow-sm"
+              aria-label="Nível 4"
+              title="Nível 4"
+            >
               4
             </div>
           </div>
@@ -272,7 +547,7 @@ function HomeScreen({
         <div className="rounded-2xl border border-moss/15 bg-card p-5 shadow-sm shadow-moss/5">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-sm font-semibold text-moss">
-              <Sparkles className="h-4 w-4 text-xp" /> XP da semana
+              <Sparkles className="h-4 w-4 text-xp" /> Nível 4 · XP da semana
             </span>
             <span className="rounded-full bg-moss/10 px-3 py-0.5 text-sm font-bold text-moss">
               320 / 500
@@ -282,8 +557,36 @@ function HomeScreen({
             <div className="h-full rounded-full bg-moss shadow-sm" style={{ width: "64%" }} />
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            Faltam <span className="font-bold text-moss">180 XP</span> para o nível 5
+            Meta semanal · faltam <span className="font-bold text-moss">180 XP</span> para o
+            nível 5
           </p>
+        </div>
+
+        <div className="rounded-2xl border border-invasive/25 bg-invasive/6 p-5">
+          <div className="flex items-start gap-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-invasive/15">
+              <AlertTriangle className="h-4 w-4 text-invasive" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-invasive">+50 XP Bônus essa semana</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Registre 1 espécie invasora no bairro do Bessa.
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  onStartCapture({
+                    preferInvasive: true,
+                    missionTitle: "Bônus: invasora no Bessa",
+                    locationLabel: "Bessa",
+                  })
+                }
+                className="mt-3 w-full rounded-xl bg-invasive px-4 py-2.5 text-sm font-semibold text-invasive-foreground transition hover:opacity-90"
+              >
+                Registrar invasora
+              </button>
+            </div>
+          </div>
         </div>
 
         <Section
@@ -293,39 +596,24 @@ function HomeScreen({
         >
           <div className="space-y-1">
             {ranking.slice(0, 3).map((r) => (
-              <div
-                key={r.pos}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm ${
-                  r.you ? "bg-moss/8 ring-1 ring-moss/20" : ""
-                }`}
-              >
-                <span
-                  className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-bold ${
-                    r.pos === 1
-                      ? "bg-xp/20 text-yellow-700"
-                      : r.pos === 2
-                        ? "bg-sage/20 text-moss"
-                        : "bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  {r.pos}
-                </span>
-                <span className="flex-1 truncate font-medium text-foreground">
-                  {r.name}
-                  {r.you && " (você)"}
-                </span>
-                <span className="font-bold text-moss">{r.xp} XP</span>
-              </div>
+              <RankingRow key={r.pos} entry={r} />
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setRankingOpen(true)}
+            className="mt-3 w-full text-center text-sm font-semibold text-moss transition hover:opacity-80"
+          >
+            Ver ranking completo
+          </button>
         </Section>
 
         <Section
           icon={<Leaf className="h-4 w-4" />}
           title="Missões Ativas"
-          subtitle="Da Profª Eliana"
+          subtitle="Deslize · Da Profª Eliana"
         >
-          <div className="space-y-2.5">
+          <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
             {missions.map((m) => (
               <button
                 key={m.id}
@@ -333,12 +621,14 @@ function HomeScreen({
                 onClick={() =>
                   onStartCapture({ missionId: m.id, missionTitle: m.title })
                 }
-                className="block w-full rounded-xl bg-secondary/60 p-4 text-left transition hover:bg-secondary"
+                className="w-[78%] shrink-0 snap-start rounded-xl bg-secondary/60 p-4 text-left transition hover:bg-secondary sm:w-[70%]"
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-semibold leading-snug text-foreground">{m.title}</p>
-                  <span className="shrink-0 rounded-full bg-moss/10 px-2.5 py-0.5 text-xs font-bold text-moss">
-                    {m.deadline}
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${missionStatusClass(m.status)}`}
+                  >
+                    {m.deadline} · {missionStatusLabel(m.status)}
                   </span>
                 </div>
                 <div className="mt-2.5 flex items-center gap-2.5">
@@ -356,20 +646,6 @@ function HomeScreen({
             ))}
           </div>
         </Section>
-
-        <div className="rounded-2xl border border-invasive/25 bg-invasive/6 p-5">
-          <div className="flex items-start gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-invasive/15">
-              <AlertTriangle className="h-4 w-4 text-invasive" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-invasive">+50 XP Bônus essa semana</p>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Registre 1 espécie invasora no bairro do Bessa.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
 
       <HelpDialog
@@ -384,6 +660,7 @@ function HomeScreen({
         onOpenChange={setNotifOpen}
         notifications={getStudentNotifications(missions)}
       />
+      <RankingDialog open={rankingOpen} onOpenChange={setRankingOpen} />
     </>
   );
 }
@@ -539,20 +816,20 @@ function CatalogScreen({
                     <p className="truncate text-xs text-muted-foreground">{p.scientific}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
                       {p.invasive ? (
-                        <span className="inline-block rounded border border-invasive/30 bg-invasive/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-invasive">
+                        <span className="inline-block rounded border border-invasive/30 bg-invasive/10 px-1.5 py-0.5 text-xs font-bold uppercase text-invasive">
                           Invasora
                         </span>
                       ) : (
-                        <span className="inline-block rounded border border-moss/30 bg-moss/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-moss">
+                        <span className="inline-block rounded border border-moss/30 bg-moss/10 px-1.5 py-0.5 text-xs font-bold uppercase text-moss">
                           Nativa
                         </span>
                       )}
                       {isRegistered ? (
-                        <span className="inline-block rounded border border-moss/30 bg-moss px-1.5 py-0.5 text-[10px] font-bold uppercase text-moss-foreground">
+                        <span className="inline-block rounded border border-moss/30 bg-moss px-1.5 py-0.5 text-xs font-bold uppercase text-moss-foreground">
                           ✓ Registrada
                         </span>
                       ) : (
-                        <span className="inline-block rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
+                        <span className="inline-block rounded border border-border bg-secondary px-1.5 py-0.5 text-xs font-bold uppercase text-muted-foreground">
                           A descobrir
                         </span>
                       )}
@@ -703,7 +980,7 @@ function AchievementsScreen({
                     }}
                   />
                 </div>
-                <p className="mt-1 text-[10px] font-semibold text-muted-foreground">
+                <p className="mt-1 text-xs font-semibold text-muted-foreground">
                   {a.progress}/{a.total}
                   {a.unlocked && " · Desbloqueada!"}
                 </p>
@@ -719,8 +996,14 @@ function AchievementsScreen({
 /* ---------------- PROFILE ---------------- */
 
 function ProfileScreen() {
+  const navigate = useNavigate();
   const stats = getStudentStats();
   const [helpOpen, setHelpOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [displayName, setDisplayName] = useState("Paulo S.");
+  const [avatarSrc, setAvatarSrc] = useState(assets.paulo);
 
   return (
     <>
@@ -729,14 +1012,15 @@ function ProfileScreen() {
 
         <div className="rounded-2xl border border-border bg-card p-5 text-center">
           <img
-            src={assets.paulo}
-            alt="Paulo"
+            src={avatarSrc}
+            alt={displayName}
             className="mx-auto h-20 w-20 rounded-2xl object-cover ring-2 ring-moss/20"
           />
-          <h2 className="mt-3 text-xl font-bold text-foreground">Paulo S.</h2>
+          <h2 className="mt-3 text-xl font-bold text-foreground">{displayName}</h2>
           <p className="text-sm text-muted-foreground">Nível 4 · 320 XP · 1º Ano</p>
           <button
             type="button"
+            onClick={() => setEditOpen(true)}
             className="mt-4 w-full rounded-xl bg-moss px-4 py-2.5 text-sm font-medium text-moss-foreground"
           >
             Editar Perfil
@@ -756,8 +1040,17 @@ function ProfileScreen() {
             onPress={() => setHelpOpen(true)}
           />
           <SettingRow icon={Bell} label="Avisos e Notificações" toggle defaultOn />
-          <SettingRow icon={Shield} label="Privacidade e Permissões" />
-          <SettingRow icon={LogOut} label="Sair da Conta" danger />
+          <SettingRow
+            icon={Shield}
+            label="Privacidade e Permissões"
+            onPress={() => setPrivacyOpen(true)}
+          />
+          <SettingRow
+            icon={LogOut}
+            label="Sair da Conta"
+            danger
+            onPress={() => setLogoutOpen(true)}
+          />
         </div>
       </div>
 
@@ -768,6 +1061,36 @@ function ProfileScreen() {
         title="Ajuda — Flora Explorer"
         description="Perguntas frequentes para alunos"
       />
+      <EditProfileDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        name={displayName}
+        avatarSrc={avatarSrc}
+        onSave={({ name, avatarSrc: nextAvatar }) => {
+          setDisplayName(name);
+          setAvatarSrc(nextAvatar);
+        }}
+      />
+      <PrivacyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sair da conta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A sessão do protótipo será encerrada e você voltará à tela inicial.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-invasive text-invasive-foreground hover:bg-invasive/90"
+              onClick={() => navigate({ to: "/" })}
+            >
+              Sair
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
@@ -856,12 +1179,30 @@ function CaptureFlow({
     resolveSuggestedPlant(captureContext),
   );
   const [confirmedPlant, setConfirmedPlant] = useState<Plant | null>(null);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
 
   const activeMission = captureContext?.missionId
     ? missions.find((m) => m.id === captureContext.missionId)
-    : missions.find((m) => m.id === "solon");
+    : undefined;
 
-  const missionBanner = captureContext?.missionTitle ?? activeMission?.title;
+  const contextBanner = captureContext?.missionId
+    ? `Missão: ${captureContext.missionTitle ?? activeMission?.title ?? ""}`
+    : captureContext?.missionTitle;
+
+  const replacePreview = (next: string | null) => {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = next;
+    setPreviewUrl(next);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
 
   const handleAnalyze = () => {
     const plant = resolveSuggestedPlant(captureContext);
@@ -876,6 +1217,8 @@ function CaptureFlow({
   };
 
   const handleRetry = () => {
+    replacePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setSuggestedPlant(resolveSuggestedPlant(captureContext));
     setStep("camera");
   };
@@ -883,48 +1226,104 @@ function CaptureFlow({
   const handleMissionUpdate = () => {
     if (captureContext?.missionId) {
       onMissionProgress(captureContext.missionId);
-    } else if (activeMission) {
-      onMissionProgress(activeMission.id);
+      setStep("mission");
+      return;
     }
-    setStep("mission");
+    onClose();
+  };
+
+  const requestClose = () => {
+    if (step === "camera" || step === "mission") {
+      onClose();
+      return;
+    }
+    setDiscardOpen(true);
+  };
+
+  const openGallery = () => fileInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    replacePreview(URL.createObjectURL(file));
+  };
+
+  const handleShutter = () => {
+    if (previewUrl) handleAnalyze();
+    else openGallery();
   };
 
   return (
     <div className="relative flex h-full flex-col bg-foreground/95 text-cream">
-      {missionBanner && step !== "mission" && (
+      {contextBanner && step !== "mission" && (
         <div className="absolute left-0 right-0 top-0 z-10 bg-moss/95 px-4 py-2 text-center text-xs font-semibold text-moss-foreground backdrop-blur-sm">
-          Missão: {missionBanner}
+          {contextBanner}
         </div>
       )}
 
       <button
         type="button"
-        onClick={onClose}
+        onClick={requestClose}
         className="absolute right-4 top-4 z-20 grid h-9 w-9 place-items-center rounded-full bg-cream/15 text-cream backdrop-blur-sm"
       >
         <X className="h-4 w-4" />
       </button>
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       {step === "camera" && (
         <div className="relative flex h-full flex-col items-center justify-between py-10 pt-14">
-          <p className="text-xs uppercase tracking-[0.2em] opacity-70">Aponte para a planta</p>
-          <div className="relative grid h-64 w-64 place-items-center">
+          <div className="px-6 text-center">
+            <p className="text-xs uppercase tracking-[0.2em] opacity-70">
+              Simular captura (protótipo)
+            </p>
+            <p className="mt-1 text-sm opacity-60">
+              Escolha uma foto da galeria para continuar
+            </p>
+          </div>
+          <div className="relative grid h-64 w-64 place-items-center overflow-hidden rounded-3xl">
             <div className="absolute inset-0 rounded-3xl border-2 border-dashed border-sage/60" />
-            <div className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-sage/80" />
-            <ImageIcon className="h-10 w-10 text-sage/40" />
-            <span className="absolute -top-3 left-3 rounded-full bg-moss px-2 py-0.5 text-[10px] font-medium">
-              Parque Solon de Lucena
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt="Prévia da captura"
+                className="h-full w-full rounded-3xl object-cover"
+              />
+            ) : (
+              <>
+                <div className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-sage/80" />
+                <ImageIcon className="h-10 w-10 text-sage/40" />
+              </>
+            )}
+            <span className="absolute -top-3 left-3 z-10 rounded-full bg-moss px-2 py-0.5 text-[10px] font-medium">
+              {captureContext?.locationLabel ?? "Parque Solon de Lucena"}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={handleAnalyze}
-            className="grid h-20 w-20 place-items-center rounded-full bg-cream"
-          >
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-moss text-moss-foreground">
-              <Camera className="h-6 w-6" />
-            </div>
-          </button>
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={openGallery}
+              className="text-sm font-semibold text-sage underline-offset-2 hover:underline"
+            >
+              Escolher da galeria
+            </button>
+            <button
+              type="button"
+              onClick={handleShutter}
+              aria-label={previewUrl ? "Analisar foto" : "Escolher foto"}
+              className="grid h-20 w-20 place-items-center rounded-full bg-cream"
+            >
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-moss text-moss-foreground">
+                <Camera className="h-6 w-6" />
+              </div>
+            </button>
+          </div>
         </div>
       )}
 
@@ -960,6 +1359,26 @@ function CaptureFlow({
       {step === "mission" && activeMission && (
         <MissionUpdated mission={activeMission} onClose={onClose} />
       )}
+
+      <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Descartar captura?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Seu progresso desta sessão será perdido.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-invasive text-invasive-foreground hover:bg-invasive/90"
+              onClick={onClose}
+            >
+              Sair
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -977,7 +1396,14 @@ function PlantSheet({
   onRetry?: () => void;
   onContinue?: () => void;
 }) {
+  const [curiosityOpen, setCuriosityOpen] = useState(false);
   const [bonusClaimed, setBonusClaimed] = useState(false);
+
+  useEffect(() => {
+    if (!curiosityOpen || bonusClaimed) return;
+    const timer = setTimeout(() => setBonusClaimed(true), 1500);
+    return () => clearTimeout(timer);
+  }, [curiosityOpen, bonusClaimed]);
 
   return (
     <div className="relative h-full overflow-y-auto bg-background pt-10 text-foreground">
@@ -1046,7 +1472,7 @@ function PlantSheet({
         {mode === "registered" && (
           <>
             <div className="rounded-2xl border border-xp/40 bg-xp/12 p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <div className="grid h-9 w-9 place-items-center rounded-full bg-xp text-foreground">
                     <Sparkles className="h-4 w-4" />
@@ -1056,28 +1482,29 @@ function PlantSheet({
                     <p className="text-[11px] text-muted-foreground">por captura</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setBonusClaimed(true)}
-                  disabled={bonusClaimed}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition ${
-                    bonusClaimed
-                      ? "bg-moss/15 text-moss"
-                      : "bg-moss text-moss-foreground hover:bg-moss/90"
-                  }`}
-                >
-                  {bonusClaimed ? (
-                    <>
-                      <CheckCircle2 className="h-3.5 w-3.5" /> +5 XP coletado
-                    </>
-                  ) : (
-                    <>Ler curiosidades · +5 XP Bônus</>
-                  )}
-                </button>
+                {!curiosityOpen && (
+                  <button
+                    type="button"
+                    onClick={() => setCuriosityOpen(true)}
+                    className="rounded-full border border-moss/30 bg-card px-3 py-2 text-xs font-semibold text-moss transition hover:bg-moss/10"
+                  >
+                    Ver curiosidade
+                  </button>
+                )}
+                {curiosityOpen && !bonusClaimed && (
+                  <span className="rounded-full bg-secondary px-3 py-2 text-xs font-semibold text-muted-foreground">
+                    Lendo…
+                  </span>
+                )}
+                {bonusClaimed && (
+                  <span className="flex items-center gap-1.5 rounded-full bg-moss/15 px-3 py-2 text-xs font-semibold text-moss transition">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> +5 XP coletado
+                  </span>
+                )}
               </div>
-              {bonusClaimed && (
+              {curiosityOpen && (
                 <p className="mt-3 rounded-lg bg-card p-3 text-xs leading-relaxed text-foreground/80">
-                  💡 {plant.curiosity}
+                  {plant.curiosity}
                 </p>
               )}
             </div>
