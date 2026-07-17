@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Bell,
   ChevronRight,
+  ChevronDown,
   Search,
   Download,
   CheckCircle2,
@@ -23,6 +24,7 @@ import {
   Pencil,
   Menu,
   HelpCircle,
+  X,
 } from "lucide-react";
 import {
   alunosRelatorio,
@@ -58,16 +60,29 @@ const NAV_ITEMS: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "config", label: "Configurações", icon: Settings },
 ];
 
+type RecentActivity = { d: string; t: string; s: string; p: string };
+
+const INITIAL_ACTIVITIES: RecentActivity[] = [
+  { d: "Explore o Parque Solon de Lucena", t: "1º Ano", s: "andamento", p: "20/06" },
+  { d: "Árvores da nossa cidade", t: "2º Ano", s: "concluido", p: "10/06" },
+  { d: "Espécies da orla de Cabo Branco", t: "3º Ano", s: "andamento", p: "25/06" },
+  { d: "Caça às invasoras no Bessa", t: "2º Ano", s: "andamento", p: "28/06" },
+];
+
 function WebDashboard() {
   const [section, setSection] = useState<Section>("dashboard");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>(INITIAL_ACTIVITIES);
 
   const goToSection = (s: Section) => {
     setSection(s);
     setMobileNavOpen(false);
   };
+
+  const addActivity = (a: RecentActivity) =>
+    setRecentActivities((prev) => [a, ...prev]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -79,11 +94,22 @@ function WebDashboard() {
             onOpenNav={() => setMobileNavOpen(true)}
             onHelp={() => setHelpOpen(true)}
             onNotifications={() => setNotificationsOpen(true)}
+            onGoTurmas={() => goToSection("turmas")}
           />
           <main className="flex-1 px-6 py-6 lg:px-8 lg:py-7">
-            {section === "dashboard" && <DashboardHome onGoTurmas={() => goToSection("turmas")} />}
+            {section === "dashboard" && (
+              <DashboardHome
+                onGoTurmas={() => goToSection("turmas")}
+                recentActivities={recentActivities}
+              />
+            )}
             {section === "turmas" && <GerenciarTurmas />}
-            {section === "nova" && <NovaAtividade onDone={() => goToSection("dashboard")} />}
+            {section === "nova" && (
+              <NovaAtividade
+                onDone={() => goToSection("dashboard")}
+                onAddActivity={addActivity}
+              />
+            )}
             {section === "config" && <Configuracoes />}
           </main>
         </div>
@@ -208,15 +234,24 @@ function SidebarFooter() {
   );
 }
 
+const TURMAS_ATIVAS_RESUMO = [
+  { nome: "1º Ano — Turma A", alunos: 28, desafios: 2 },
+  { nome: "2º Ano — Turma B", alunos: 28, desafios: 1 },
+];
+
 function TopBar({
   onOpenNav,
   onHelp,
   onNotifications,
+  onGoTurmas,
 }: {
   onOpenNav: () => void;
   onHelp: () => void;
   onNotifications: () => void;
+  onGoTurmas: () => void;
 }) {
+  const [turmasOpen, setTurmasOpen] = useState(false);
+
   return (
     <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3.5 lg:px-8">
       <div className="flex items-center gap-3">
@@ -237,12 +272,44 @@ function TopBar({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          className="hidden items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground sm:flex hover:border-moss/40 hover:text-moss transition"
-        >
-          <Calendar className="h-3.5 w-3.5" /> 2 turmas ativas
-        </button>
+        {/* Badge turmas ativas com dropdown */}
+        <div className="relative hidden sm:block">
+          <button
+            type="button"
+            onClick={() => setTurmasOpen((v) => !v)}
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-moss/40 hover:text-moss transition"
+          >
+            <Calendar className="h-3.5 w-3.5" />
+            2 turmas ativas
+            <ChevronDown className={`h-3 w-3 transition-transform ${turmasOpen ? "rotate-180" : ""}`} />
+          </button>
+          {turmasOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setTurmasOpen(false)} />
+              <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-border bg-card shadow-xl">
+                <div className="border-b border-border px-4 py-2.5">
+                  <p className="text-xs font-semibold text-foreground">Turmas ativas</p>
+                </div>
+                {TURMAS_ATIVAS_RESUMO.map((t) => (
+                  <div key={t.nome} className="px-4 py-3 hover:bg-secondary/50 transition">
+                    <p className="text-sm font-medium text-foreground">{t.nome}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.alunos} alunos · {t.desafios} desafio{t.desafios !== 1 ? "s" : ""} ativo{t.desafios !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                ))}
+                <div className="border-t border-border p-2">
+                  <button
+                    onClick={() => { setTurmasOpen(false); onGoTurmas(); }}
+                    className="w-full rounded-lg px-3 py-1.5 text-xs font-medium text-moss hover:bg-moss/8 transition text-center"
+                  >
+                    Gerenciar turmas →
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
         <button
           type="button"
           onClick={onHelp}
@@ -270,10 +337,29 @@ function TopBar({
 }
 
 /* ---------------- DASHBOARD ---------------- */
-function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
+const FULL_RANKING = [
+  { p: 1, n: "Felipe Andrade", t: "1º Ano", xp: 560 },
+  { p: 2, n: "Paulo S.", t: "1º Ano", xp: 320 },
+  { p: 3, n: "Ana Beatriz", t: "2º Ano", xp: 280 },
+  { p: 4, n: "Carla R.", t: "3º Ano", xp: 245 },
+  { p: 5, n: "João M.", t: "1º Ano", xp: 210 },
+  { p: 6, n: "Luana T.", t: "2º Ano", xp: 195 },
+  { p: 7, n: "Bruno F.", t: "3º Ano", xp: 180 },
+  { p: 8, n: "Maria L.", t: "1º Ano", xp: 165 },
+];
+
+function DashboardHome({
+  onGoTurmas,
+  recentActivities,
+}: {
+  onGoTurmas: () => void;
+  recentActivities: RecentActivity[];
+}) {
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [rankingModalOpen, setRankingModalOpen] = useState(false);
+
   return (
     <div className="space-y-6">
-      {/* Page title */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">Visão geral do engajamento das turmas</p>
@@ -292,16 +378,15 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
               <AlertTriangle className="h-5 w-5 text-invasive" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-widest text-invasive">
-                Alerta ambiental
-              </p>
-              <h3 className="mt-2 text-base font-bold leading-snug text-foreground">
-                Alta incidência de Amendoeira invasora
-              </h3>
+              <p className="text-xs font-semibold uppercase tracking-widest text-invasive">Alerta ambiental</p>
+              <h3 className="mt-2 text-base font-bold leading-snug text-foreground">Alta incidência de Amendoeira invasora</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 Detectada na região do <strong className="text-foreground">Bessa</strong>. 14 registros nos últimos 7 dias.
               </p>
-              <button className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-invasive px-4 py-2 text-sm font-medium text-invasive-foreground hover:opacity-90">
+              <button
+                onClick={() => setMapModalOpen(true)}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-invasive px-4 py-2 text-sm font-medium text-invasive-foreground hover:opacity-90"
+              >
                 <MapPin className="h-4 w-4" /> Ver mapa
               </button>
             </div>
@@ -329,23 +414,19 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {[
-                  { d: "Explore o Parque Solon de Lucena", t: "1º Ano", s: "andamento", p: "20/06" },
-                  { d: "Árvores da nossa cidade", t: "2º Ano", s: "concluido", p: "10/06" },
-                  { d: "Espécies da orla de Cabo Branco", t: "3º Ano", s: "andamento", p: "25/06" },
-                  { d: "Caça às invasoras no Bessa", t: "2º Ano", s: "andamento", p: "28/06" },
-                ].map((r) => (
-                  <tr key={r.d} className="hover:bg-secondary/40 transition">
+                {recentActivities.map((r) => (
+                  <tr
+                    key={r.d}
+                    onClick={onGoTurmas}
+                    className="cursor-pointer hover:bg-secondary/40 transition"
+                    title="Ver relatório da atividade"
+                  >
                     <td className="px-5 py-3.5 text-sm font-medium text-foreground">{r.d}</td>
                     <td className="px-5 py-3.5 text-sm text-muted-foreground">{r.t}</td>
                     <td className="px-5 py-3.5">
-                      <span
-                        className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${
-                          r.s === "concluido"
-                            ? "bg-moss/10 text-moss"
-                            : "bg-secondary text-muted-foreground"
-                        }`}
-                      >
+                      <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${
+                        r.s === "concluido" ? "bg-moss/10 text-moss" : "bg-secondary text-muted-foreground"
+                      }`}>
                         {r.s === "concluido" ? "Concluído" : "Em andamento"}
                       </span>
                     </td>
@@ -358,31 +439,18 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
         </Card>
 
         <Card>
-          <CardHeader
-            title="Ranking da Semana"
-            icon={<Trophy className="h-4 w-4 text-xp" />}
-          />
-          <div className="mt-4 space-y-1">
-            {[
-              { p: 1, n: "Felipe Andrade", t: "1º Ano", xp: 560 },
-              { p: 2, n: "Paulo S.", t: "1º Ano", xp: 320 },
-              { p: 3, n: "Ana Beatriz", t: "2º Ano", xp: 280 },
-            ].map((r) => (
-              <div
-                key={r.p}
-                className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary transition"
-              >
-                <span
-                  className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${
-                    r.p === 1
-                      ? "bg-xp/20 text-yellow-700"
-                      : r.p === 2
-                        ? "bg-sage/20 text-moss"
-                        : "bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  {r.p}
-                </span>
+          <div className="flex items-center justify-between mb-1">
+            <CardHeader title="Ranking da Semana" icon={<Trophy className="h-4 w-4 text-xp" />} />
+            <button onClick={() => setRankingModalOpen(true)} className="text-xs font-medium text-moss hover:underline shrink-0">
+              Ver todos →
+            </button>
+          </div>
+          <div className="mt-3 space-y-1">
+            {FULL_RANKING.slice(0, 3).map((r) => (
+              <div key={r.p} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary transition">
+                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${
+                  r.p === 1 ? "bg-xp/20 text-yellow-700" : r.p === 2 ? "bg-sage/20 text-moss" : "bg-secondary text-muted-foreground"
+                }`}>{r.p}</span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground">{r.n}</p>
                   <p className="text-xs text-muted-foreground">{r.t}</p>
@@ -393,6 +461,68 @@ function DashboardHome({ onGoTurmas }: { onGoTurmas: () => void }) {
           </div>
         </Card>
       </div>
+
+      {/* Modal: Mapa do Bessa */}
+      {mapModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setMapModalOpen(false)}>
+          <div className="w-full max-w-2xl rounded-2xl bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <div>
+                <h2 className="text-base font-bold text-foreground">Registros — Bessa</h2>
+                <p className="text-xs text-muted-foreground">14 ocorrências de Amendoeira invasora (7 dias)</p>
+              </div>
+              <button onClick={() => setMapModalOpen(false)} className="grid h-8 w-8 place-items-center rounded-lg border border-border hover:bg-secondary transition">
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="relative overflow-hidden rounded-b-2xl">
+              <img src={mapJP} alt="Mapa de João Pessoa" className="w-full" />
+              <svg viewBox="0 0 100 67" className="absolute inset-0 h-full w-full pointer-events-none" preserveAspectRatio="none">
+                {/* Bessa highlight — NE coastal region */}
+                <polygon points="72,18 80,16 85,22 83,32 76,34 70,28" fill="oklch(0.55 0.18 25 / 0.25)" stroke="oklch(0.55 0.18 25)" strokeWidth="0.5" />
+                {[{cx:74,cy:22},{cx:78,cy:19},{cx:82,cy:24},{cx:80,cy:29},{cx:75,cy:31},{cx:77,cy:25}].map((pt,i) => (
+                  <circle key={i} cx={pt.cx} cy={pt.cy} r="1.5" fill="oklch(0.55 0.18 25)" stroke="white" strokeWidth="0.4" />
+                ))}
+              </svg>
+              <div className="absolute bottom-3 left-3 rounded-xl bg-card/95 px-3 py-2 text-xs shadow-lg backdrop-blur-sm">
+                <p className="font-semibold text-invasive">⚠️ Bessa — 14 registros</p>
+                <p className="text-muted-foreground">Terminalia catappa (Amendoeira)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Ranking completo */}
+      {rankingModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setRankingModalOpen(false)}>
+          <div className="w-full max-w-md rounded-2xl bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-xp" />
+                <h2 className="text-base font-bold text-foreground">Ranking da Semana</h2>
+              </div>
+              <button onClick={() => setRankingModalOpen(false)} className="grid h-8 w-8 place-items-center rounded-lg border border-border hover:bg-secondary transition">
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="divide-y divide-border max-h-[60vh] overflow-y-auto">
+              {FULL_RANKING.map((r) => (
+                <div key={r.p} className="flex items-center gap-3 px-5 py-3.5 hover:bg-secondary/50 transition">
+                  <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${
+                    r.p === 1 ? "bg-xp/20 text-yellow-700" : r.p === 2 ? "bg-sage/20 text-moss" : r.p === 3 ? "bg-secondary text-muted-foreground" : "bg-transparent text-muted-foreground"
+                  }`}>{r.p}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-foreground">{r.n}</p>
+                    <p className="text-xs text-muted-foreground">{r.t}</p>
+                  </div>
+                  <span className="text-sm font-bold text-moss">{r.xp} XP</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -671,7 +801,7 @@ function Select({
 }
 
 /* ---------------- NOVA ATIVIDADE ---------------- */
-function NovaAtividade({ onDone }: { onDone: () => void }) {
+function NovaAtividade({ onDone, onAddActivity }: { onDone: () => void; onAddActivity: (a: RecentActivity) => void }) {
   const [step, setStep] = useState(0);
   const [turma, setTurma] = useState<Turma>("1º Ano");
   const [polyPoints, setPolyPoints] = useState<[number, number][]>([]);
@@ -680,6 +810,7 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
     "Encontre e fotografe 3 espécies invasoras no bairro do Bessa.",
   );
   const [obligatory, setObligatory] = useState(true);
+  const [deadline, setDeadline] = useState("2026-06-28");
   const [done, setDone] = useState(false);
 
   const hasPolygon = polyPoints.length >= 3;
@@ -916,7 +1047,8 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
                 <Field label="Data-limite">
                   <input
                     type="date"
-                    defaultValue="2026-06-28"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
                     className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-moss"
                   />
                 </Field>
@@ -949,12 +1081,23 @@ function NovaAtividade({ onDone }: { onDone: () => void }) {
                   value={hasPolygon ? `Zona customizada · ${polyPoints.length} vértices` : "Sem geofencing"}
                 />
                 <Review label="Título" value={title} />
-                <Review label="Prazo" value="28/06/2026" />
+                <Review
+                  label="Prazo"
+                  value={deadline
+                    ? new Date(deadline + "T12:00:00").toLocaleDateString("pt-BR")
+                    : "—"}
+                />
                 <Review label="Obrigatório" value={obligatory ? "Sim" : "Não"} />
                 <Review label="Estimativa" value="120 espécies catalogadas" />
               </div>
               <button
-                onClick={() => setDone(true)}
+                onClick={() => {
+                  const prazo = deadline
+                    ? new Date(deadline + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
+                    : "—";
+                  onAddActivity({ d: title, t: turma, s: "andamento", p: prazo });
+                  setDone(true);
+                }}
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-moss py-3 font-medium text-moss-foreground"
               >
                 <Rocket className="h-4 w-4" /> Lançar Desafio
@@ -1010,6 +1153,21 @@ function Review({ label, value }: { label: string; value: string }) {
 
 /* ---------------- CONFIG ---------------- */
 function Configuracoes() {
+  const [nome, setNome] = useState("Eliana Mendes");
+  const [email, setEmail] = useState("eliana.mendes@escola.pb.gov.br");
+  const [escola, setEscola] = useState("EEEFM Olivina Olívia");
+  const [disciplina, setDisciplina] = useState("Biologia · Ensino Médio");
+  const [saved, setSaved] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  const mark = () => { setSaved(false); setDirty(true); };
+
+  const handleSave = () => {
+    setSaved(true);
+    setDirty(false);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
       <div>
@@ -1023,42 +1181,65 @@ function Configuracoes() {
           <IntegrationRow
             name="Google Sala de Aula"
             desc="Sincronize turmas e lance atividades direto no Classroom."
-            connected
+            initialConnected
           />
           <IntegrationRow
             name="Diário de Classe (SEDUC-PB)"
             desc="Envie automaticamente notas dos desafios concluídos."
+            comingSoon
           />
         </div>
       </Card>
 
       <Card className="p-8">
-        <CardHeader title="Dados da Conta" subtitle="Profª Eliana M. · UFPB" />
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+        <div className="flex items-center justify-between mb-6">
+          <CardHeader title="Dados da Conta" subtitle="Profª Eliana M. · UFPB" />
+          {dirty && (
+            <span className="text-xs font-medium text-terracotta">● Alterações não salvas</span>
+          )}
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2">
           <Field label="Nome completo">
             <input
-              defaultValue="Eliana Mendes"
+              value={nome}
+              onChange={(e) => { setNome(e.target.value); mark(); }}
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
           <Field label="E-mail institucional">
             <input
-              defaultValue="eliana.mendes@escola.pb.gov.br"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); mark(); }}
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
           <Field label="Escola">
             <input
-              defaultValue="EEEFM Olivina Olívia"
+              value={escola}
+              onChange={(e) => { setEscola(e.target.value); mark(); }}
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
           <Field label="Disciplina">
             <input
-              defaultValue="Biologia · Ensino Médio"
+              value={disciplina}
+              onChange={(e) => { setDisciplina(e.target.value); mark(); }}
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none hover:border-moss/40 focus:border-moss transition"
             />
           </Field>
+        </div>
+        <div className="mt-6 flex items-center gap-4">
+          <button
+            onClick={handleSave}
+            className="rounded-xl bg-moss px-6 py-2.5 text-sm font-semibold text-moss-foreground hover:opacity-90 transition"
+          >
+            Salvar alterações
+          </button>
+          {saved && (
+            <span className="flex items-center gap-1.5 text-sm font-medium text-moss">
+              <CheckCircle2 className="h-4 w-4" /> Salvo com sucesso!
+            </span>
+          )}
         </div>
       </Card>
     </div>
@@ -1068,12 +1249,16 @@ function Configuracoes() {
 function IntegrationRow({
   name,
   desc,
-  connected,
+  initialConnected,
+  comingSoon,
 }: {
   name: string;
   desc: string;
-  connected?: boolean;
+  initialConnected?: boolean;
+  comingSoon?: boolean;
 }) {
+  const [connected, setConnected] = useState(!!initialConnected);
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-cream p-5">
       <div className="flex items-start sm:items-center gap-4">
@@ -1085,13 +1270,23 @@ function IntegrationRow({
           <p className="mt-0.5 text-sm text-muted-foreground">{desc}</p>
         </div>
       </div>
-      <button
-        className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition sm:shrink-0 ${
-          connected ? "bg-moss/12 text-moss hover:bg-moss/20" : "bg-moss text-moss-foreground hover:opacity-90"
-        }`}
-      >
-        {connected ? "Conectado ✓" : "Conectar"}
-      </button>
+      {comingSoon ? (
+        <span className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-muted-foreground sm:shrink-0 cursor-default">
+          Em breve
+        </span>
+      ) : (
+        <button
+          onClick={() => setConnected((v) => !v)}
+          className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition sm:shrink-0 ${
+            connected
+              ? "bg-moss/12 text-moss hover:bg-invasive/10 hover:text-invasive"
+              : "bg-moss text-moss-foreground hover:opacity-90"
+          }`}
+          title={connected ? "Clique para desconectar" : "Clique para conectar"}
+        >
+          {connected ? "Conectado ✓" : "Conectar"}
+        </button>
+      )}
     </div>
   );
 }
