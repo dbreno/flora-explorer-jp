@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Home,
   BookOpen,
@@ -17,7 +17,6 @@ import {
   Leaf,
   CheckCircle2,
   Award,
-  ImageIcon,
   Loader2,
   CircleHelp,
   HelpCircle,
@@ -1180,9 +1179,6 @@ function CaptureFlow({
   );
   const [confirmedPlant, setConfirmedPlant] = useState<Plant | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewUrlRef = useRef<string | null>(null);
 
   const activeMission = captureContext?.missionId
     ? missions.find((m) => m.id === captureContext.missionId)
@@ -1192,17 +1188,7 @@ function CaptureFlow({
     ? `Missão: ${captureContext.missionTitle ?? activeMission?.title ?? ""}`
     : captureContext?.missionTitle;
 
-  const replacePreview = (next: string | null) => {
-    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
-    previewUrlRef.current = next;
-    setPreviewUrl(next);
-  };
 
-  useEffect(() => {
-    return () => {
-      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
-    };
-  }, []);
 
   const handleAnalyze = () => {
     const plant = resolveSuggestedPlant(captureContext);
@@ -1217,8 +1203,6 @@ function CaptureFlow({
   };
 
   const handleRetry = () => {
-    replacePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
     setSuggestedPlant(resolveSuggestedPlant(captureContext));
     setStep("camera");
   };
@@ -1240,19 +1224,6 @@ function CaptureFlow({
     setDiscardOpen(true);
   };
 
-  const openGallery = () => fileInputRef.current?.click();
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    replacePreview(URL.createObjectURL(file));
-  };
-
-  const handleShutter = () => {
-    if (previewUrl) handleAnalyze();
-    else openGallery();
-  };
-
   return (
     <div className="relative flex h-full flex-col bg-foreground/95 text-cream">
       {contextBanner && step !== "mission" && (
@@ -1269,54 +1240,23 @@ function CaptureFlow({
         <X className="h-4 w-4" />
       </button>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
 
       {step === "camera" && (
-        <div className="relative flex h-full flex-col items-center justify-between py-10 pt-14">
-          <div className="px-6 text-center">
-            <p className="text-xs uppercase tracking-[0.2em] opacity-70">
-              Simular captura (protótipo)
-            </p>
-            <p className="mt-1 text-sm opacity-60">
-              Escolha uma foto da galeria para continuar
-            </p>
-          </div>
-          <div className="relative grid h-64 w-64 place-items-center overflow-hidden rounded-3xl">
-            <div className="absolute inset-0 rounded-3xl border-2 border-dashed border-sage/60" />
-            {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Prévia da captura"
-                className="h-full w-full rounded-3xl object-cover"
-              />
-            ) : (
-              <>
-                <div className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-sage/80" />
-                <ImageIcon className="h-10 w-10 text-sage/40" />
-              </>
-            )}
-            <span className="absolute -top-3 left-3 z-10 rounded-full bg-moss px-2 py-0.5 text-[10px] font-medium">
-              {captureContext?.locationLabel ?? "Parque Solon de Lucena"}
-            </span>
-          </div>
-          <div className="flex flex-col items-center gap-3">
+        <div className="relative flex h-full flex-col items-center justify-end pb-12">
+          {/* Full-bleed camera viewfinder background */}
+          <img
+            src="/plant.png"
+            alt="Câmera — planta detectada"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          {/* Subtle bottom gradient so the shutter button is visible */}
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 to-transparent" />
+
+          <div className="relative z-10">
             <button
               type="button"
-              onClick={openGallery}
-              className="text-sm font-semibold text-sage underline-offset-2 hover:underline"
-            >
-              Escolher da galeria
-            </button>
-            <button
-              type="button"
-              onClick={handleShutter}
-              aria-label={previewUrl ? "Analisar foto" : "Escolher foto"}
+              onClick={handleAnalyze}
+              aria-label="Capturar foto"
               className="grid h-20 w-20 place-items-center rounded-full bg-cream"
             >
               <div className="grid h-16 w-16 place-items-center rounded-full bg-moss text-moss-foreground">
