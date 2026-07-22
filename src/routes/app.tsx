@@ -1153,7 +1153,7 @@ function SettingRow({
 
 /* ---------------- CAPTURE FLOW ---------------- */
 
-type CaptureStep = "camera" | "analyzing" | "confirm" | "registered" | "mission";
+type CaptureStep = "camera" | "analyzing" | "registered" | "mission";
 
 function resolveSuggestedPlant(context: CaptureContext | null): Plant {
   if (context?.preferInvasive) return plants.find((p) => p.invasive) ?? plants[1];
@@ -1194,17 +1194,10 @@ function CaptureFlow({
     const plant = resolveSuggestedPlant(captureContext);
     setSuggestedPlant(plant);
     setStep("analyzing");
-    setTimeout(() => setStep("confirm"), 1800);
-  };
-
-  const handleConfirm = () => {
-    setConfirmedPlant(suggestedPlant);
-    setStep("registered");
-  };
-
-  const handleRetry = () => {
-    setSuggestedPlant(resolveSuggestedPlant(captureContext));
-    setStep("camera");
+    setTimeout(() => {
+      setConfirmedPlant(plant);
+      setStep("registered");
+    }, 1800);
   };
 
   const handleMissionUpdate = () => {
@@ -1279,15 +1272,6 @@ function CaptureFlow({
         </div>
       )}
 
-      {step === "confirm" && (
-        <PlantSheet
-          plant={suggestedPlant}
-          mode="confirm"
-          onConfirm={handleConfirm}
-          onRetry={handleRetry}
-        />
-      )}
-
       {step === "registered" && confirmedPlant && (
         <PlantSheet
           plant={confirmedPlant}
@@ -1326,18 +1310,16 @@ function CaptureFlow({
 function PlantSheet({
   plant,
   mode,
-  onConfirm,
-  onRetry,
   onContinue,
 }: {
   plant: Plant;
-  mode: "confirm" | "registered";
-  onConfirm?: () => void;
-  onRetry?: () => void;
+  mode: "registered";
   onContinue?: () => void;
 }) {
   const [curiosityOpen, setCuriosityOpen] = useState(false);
   const [bonusClaimed, setBonusClaimed] = useState(false);
+  // Controls whether the XP burst overlay is shown (only in registered mode)
+  const [showXpOverlay, setShowXpOverlay] = useState(mode === "registered");
 
   useEffect(() => {
     if (!curiosityOpen || bonusClaimed) return;
@@ -1345,6 +1327,80 @@ function PlantSheet({
     return () => clearTimeout(timer);
   }, [curiosityOpen, bonusClaimed]);
 
+  // Auto-dismiss the XP overlay after 2 seconds
+  useEffect(() => {
+    if (!showXpOverlay) return;
+    const timer = setTimeout(() => setShowXpOverlay(false), 3500);
+    return () => clearTimeout(timer);
+  }, [showXpOverlay]);
+
+  // ── XP burst overlay ─────────────────────────────────────────────────────
+  if (showXpOverlay) {
+    const isInvasive = plant.invasive;
+    return (
+      <div
+        className={`relative flex h-full flex-col items-center justify-center gap-6 px-8 text-center ${
+          isInvasive ? "bg-invasive" : "bg-moss"
+        }`}
+        style={{ animation: "fadeIn 0.3s ease-out" }}
+      >
+        <style>{`
+          @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+          @keyframes popIn  { 0% { opacity: 0; transform: scale(0.5); } 60% { transform: scale(1.15); } 100% { opacity: 1; transform: scale(1); } }
+          @keyframes pulse-ring { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0; transform: scale(1.5); } }
+          .xp-pop { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both; }
+          .xp-ring { animation: pulse-ring 1.2s ease-out 0.5s infinite; }
+        `}</style>
+
+        {/* Pulsing background ring */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className={`xp-ring h-64 w-64 rounded-full ${isInvasive ? "bg-invasive-foreground/10" : "bg-moss-foreground/10"}`} />
+        </div>
+
+        {/* Icon burst */}
+        <div className="xp-pop relative z-10 flex flex-col items-center gap-4">
+          <div
+            className={`grid h-24 w-24 place-items-center rounded-full shadow-2xl ${
+              isInvasive
+                ? "bg-invasive-foreground/20 ring-4 ring-invasive-foreground/30"
+                : "bg-moss-foreground/20 ring-4 ring-moss-foreground/30"
+            }`}
+          >
+            {isInvasive
+              ? <AlertTriangle className="h-12 w-12 text-invasive-foreground" />
+              : <Sparkles className="h-12 w-12 text-moss-foreground" />
+            }
+          </div>
+
+          <div>
+            <p className={`text-4xl font-extrabold tracking-tight ${isInvasive ? "text-invasive-foreground" : "text-moss-foreground"}`}>
+              {isInvasive ? "+50 XP" : "+10 XP"}
+            </p>
+            <p className={`mt-1 text-base font-semibold ${isInvasive ? "text-invasive-foreground/80" : "text-moss-foreground/80"}`}>
+              {isInvasive ? "Invasora registrada! Bônus!" : "Nova espécie descoberta!"}
+            </p>
+          </div>
+
+          <p className={`text-sm ${isInvasive ? "text-invasive-foreground/60" : "text-moss-foreground/60"}`}>
+            {plant.popular}
+          </p>
+        </div>
+
+        {/* Tap to skip */}
+        <button
+          type="button"
+          onClick={() => setShowXpOverlay(false)}
+          className={`absolute bottom-10 text-xs font-medium underline-offset-2 hover:underline ${
+            isInvasive ? "text-invasive-foreground/60" : "text-moss-foreground/60"
+          }`}
+        >
+          Toque para continuar
+        </button>
+      </div>
+    );
+  }
+
+  // ── Normal plant detail sheet ─────────────────────────────────────────────
   return (
     <div className="relative h-full overflow-y-auto bg-background pt-10 text-foreground">
       {plant.invasive && (
@@ -1359,14 +1415,14 @@ function PlantSheet({
       </div>
 
       <div className="space-y-4 px-5 py-5">
-        {mode === "confirm" && (
-          <p className="text-sm font-medium text-moss">
-            A IA sugere esta espécie. Confirme ou tente novamente.
-          </p>
-        )}
         {mode === "registered" && !plant.invasive && (
           <div className="inline-flex items-center gap-1.5 rounded-full bg-xp/20 px-2.5 py-1 text-xs font-semibold text-moss">
             <Sparkles className="h-3 w-3" /> NOVA ESPÉCIE DESCOBERTA!
+          </div>
+        )}
+        {mode === "registered" && plant.invasive && (
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-invasive/15 px-2.5 py-1 text-xs font-semibold text-invasive">
+            <AlertTriangle className="h-3 w-3" /> INVASORA REGISTRADA — +50 XP
           </div>
         )}
 
@@ -1390,35 +1446,19 @@ function PlantSheet({
 
         <p className="text-sm leading-relaxed text-foreground/80">{plant.description}</p>
 
-        {mode === "confirm" && (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={onRetry}
-              className="flex-1 rounded-2xl border border-border py-3 text-sm font-medium text-foreground"
-            >
-              Tentar novamente
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="flex-1 rounded-2xl bg-moss py-3 text-sm font-medium text-moss-foreground"
-            >
-              Confirmar espécie
-            </button>
-          </div>
-        )}
 
         {mode === "registered" && (
           <>
-            <div className="rounded-2xl border border-xp/40 bg-xp/12 p-4">
+            <div className={`rounded-2xl border p-4 ${plant.invasive ? "border-invasive/30 bg-invasive/8" : "border-xp/40 bg-xp/12"}`}>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="grid h-9 w-9 place-items-center rounded-full bg-xp text-foreground">
+                  <div className={`grid h-9 w-9 place-items-center rounded-full ${plant.invasive ? "bg-invasive text-invasive-foreground" : "bg-xp text-foreground"}`}>
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-lg font-bold leading-none text-moss">+10 XP</p>
+                    <p className={`text-lg font-bold leading-none ${plant.invasive ? "text-invasive" : "text-moss"}`}>
+                      {plant.invasive ? "+50 XP" : "+10 XP"}
+                    </p>
                     <p className="text-[11px] text-muted-foreground">por captura</p>
                   </div>
                 </div>
