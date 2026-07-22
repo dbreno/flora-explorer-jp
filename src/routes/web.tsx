@@ -913,6 +913,17 @@ function NovaAtividade({ onDone, onAddActivity }: { onDone: () => void; onAddAct
                 </button>
               </div>
 
+              {/* HM10 — Instruction tooltip: visible until the first point is placed */}
+              {polyPoints.length === 0 && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-moss/25 bg-moss/8 px-4 py-3 text-sm text-moss animate-in fade-in slide-in-from-top-1 duration-300">
+                  <span className="mt-0.5 text-base leading-none select-none">📍</span>
+                  <p>
+                    <span className="font-semibold">Como usar:</span>{" "}
+                    Clique em 3 ou mais pontos no mapa para desenhar a área permitida.
+                  </p>
+                </div>
+              )}
+
               {/* Interactive map */}
               <div
                 className="relative overflow-hidden rounded-2xl border border-border bg-secondary"
