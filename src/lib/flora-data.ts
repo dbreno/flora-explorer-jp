@@ -346,7 +346,7 @@ export const FAQ_TEACHER: FaqItem[] = [
   {
     id: "integracoes",
     q: "Como funcionam as integrações?",
-    a: "Google Sala de Aula sincroniza turmas e lançamentos. O Diário de Classe (SEDUC-PB) envia notas dos desafios concluídos. Configure em Configurações > Integrações.",
+    a: "Google Sala de Aula sincroniza turmas e lançamentos. O Diário de Classe envia notas dos desafios concluídos. Configure em Configurações > Integrações.",
   },
 ];
 

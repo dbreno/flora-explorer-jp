@@ -206,11 +206,10 @@ function NavList({
           key={it.key}
           type="button"
           onClick={() => onChange(it.key)}
-          className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
-            current === it.key
+          className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${current === it.key
               ? "bg-moss/10 text-moss"
               : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-          }`}
+            }`}
         >
           <it.icon className="h-4 w-4 shrink-0" />
           {it.label}
@@ -424,9 +423,8 @@ function DashboardHome({
                     <td className="px-5 py-3.5 text-sm font-medium text-foreground">{r.d}</td>
                     <td className="px-5 py-3.5 text-sm text-muted-foreground">{r.t}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${
-                        r.s === "concluido" ? "bg-moss/10 text-moss" : "bg-secondary text-muted-foreground"
-                      }`}>
+                      <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${r.s === "concluido" ? "bg-moss/10 text-moss" : "bg-secondary text-muted-foreground"
+                        }`}>
                         {r.s === "concluido" ? "Concluído" : "Em andamento"}
                       </span>
                     </td>
@@ -448,9 +446,8 @@ function DashboardHome({
           <div className="mt-3 space-y-1">
             {FULL_RANKING.slice(0, 3).map((r) => (
               <div key={r.p} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary transition">
-                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${
-                  r.p === 1 ? "bg-xp/20 text-yellow-700" : r.p === 2 ? "bg-sage/20 text-moss" : "bg-secondary text-muted-foreground"
-                }`}>{r.p}</span>
+                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${r.p === 1 ? "bg-xp/20 text-yellow-700" : r.p === 2 ? "bg-sage/20 text-moss" : "bg-secondary text-muted-foreground"
+                  }`}>{r.p}</span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground">{r.n}</p>
                   <p className="text-xs text-muted-foreground">{r.t}</p>
@@ -480,7 +477,7 @@ function DashboardHome({
               <svg viewBox="0 0 100 67" className="absolute inset-0 h-full w-full pointer-events-none" preserveAspectRatio="none">
                 {/* Bessa highlight — NE coastal region */}
                 <polygon points="72,18 80,16 85,22 83,32 76,34 70,28" fill="oklch(0.55 0.18 25 / 0.25)" stroke="oklch(0.55 0.18 25)" strokeWidth="0.5" />
-                {[{cx:74,cy:22},{cx:78,cy:19},{cx:82,cy:24},{cx:80,cy:29},{cx:75,cy:31},{cx:77,cy:25}].map((pt,i) => (
+                {[{ cx: 74, cy: 22 }, { cx: 78, cy: 19 }, { cx: 82, cy: 24 }, { cx: 80, cy: 29 }, { cx: 75, cy: 31 }, { cx: 77, cy: 25 }].map((pt, i) => (
                   <circle key={i} cx={pt.cx} cy={pt.cy} r="1.5" fill="oklch(0.55 0.18 25)" stroke="white" strokeWidth="0.4" />
                 ))}
               </svg>
@@ -509,9 +506,8 @@ function DashboardHome({
             <div className="divide-y divide-border max-h-[60vh] overflow-y-auto">
               {FULL_RANKING.map((r) => (
                 <div key={r.p} className="flex items-center gap-3 px-5 py-3.5 hover:bg-secondary/50 transition">
-                  <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${
-                    r.p === 1 ? "bg-xp/20 text-yellow-700" : r.p === 2 ? "bg-sage/20 text-moss" : r.p === 3 ? "bg-secondary text-muted-foreground" : "bg-transparent text-muted-foreground"
-                  }`}>{r.p}</span>
+                  <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${r.p === 1 ? "bg-xp/20 text-yellow-700" : r.p === 2 ? "bg-sage/20 text-moss" : r.p === 3 ? "bg-secondary text-muted-foreground" : "bg-transparent text-muted-foreground"
+                    }`}>{r.p}</span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-foreground">{r.n}</p>
                     <p className="text-xs text-muted-foreground">{r.t}</p>
@@ -828,9 +824,8 @@ function NovaAtividade({ onDone, onAddActivity }: { onDone: () => void; onAddAct
         {steps.map((s, i) => (
           <li key={s} className="flex items-center gap-2">
             <span
-              className={`grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold ${
-                i <= step ? "bg-moss text-moss-foreground" : "bg-secondary text-muted-foreground"
-              }`}
+              className={`grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold ${i <= step ? "bg-moss text-moss-foreground" : "bg-secondary text-muted-foreground"
+                }`}
             >
               {i + 1}
             </span>
@@ -882,11 +877,10 @@ function NovaAtividade({ onDone, onAddActivity }: { onDone: () => void; onAddAct
                   <button
                     key={t}
                     onClick={() => setTurma(t)}
-                    className={`rounded-2xl border-2 p-4 text-left transition ${
-                      turma === t
+                    className={`rounded-2xl border-2 p-4 text-left transition ${turma === t
                         ? "border-moss bg-moss/8"
                         : "border-border bg-card hover:border-moss/40"
-                    }`}
+                      }`}
                   >
                     <p className="text-base font-semibold text-foreground">{t}</p>
                     <p className="text-xs text-muted-foreground">28 alunos · Ensino Médio</p>
@@ -1195,9 +1189,8 @@ function Configuracoes() {
             initialConnected
           />
           <IntegrationRow
-            name="Diário de Classe (SEDUC-PB)"
+            name="Diário de Classe"
             desc="Envie automaticamente notas dos desafios concluídos."
-            comingSoon
           />
         </div>
       </Card>
@@ -1288,11 +1281,10 @@ function IntegrationRow({
       ) : (
         <button
           onClick={() => setConnected((v) => !v)}
-          className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition sm:shrink-0 ${
-            connected
+          className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition sm:shrink-0 ${connected
               ? "bg-moss/12 text-moss hover:bg-invasive/10 hover:text-invasive"
               : "bg-moss text-moss-foreground hover:opacity-90"
-          }`}
+            }`}
           title={connected ? "Clique para desconectar" : "Clique para conectar"}
         >
           {connected ? "Conectado ✓" : "Conectar"}
